@@ -21,8 +21,8 @@ const connectDB = async () => {
 
   // 2. Try Local MongoDB connection
   try {
-    console.log('🔄 Attempting local MongoDB connection (mongodb://127.0.0.1:27017/wastewise)...');
-    const localConn = await mongoose.connect('mongodb://127.0.0.1:27017/wastewise', {
+    console.log('🔄 Attempting local MongoDB connection (mongodb://localhost:27017/wastewise)...');
+    const localConn = await mongoose.connect('mongodb://localhost:27017/wastewise', {
       serverSelectionTimeoutMS: 2000
     });
     console.log(`✅ Local MongoDB Connected: ${localConn.connection.host}`);
