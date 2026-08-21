@@ -15,12 +15,13 @@ export default defineConfig({
   server: {
     host: true,
     port: parseInt(process.env.VITE_PORT || '5173'),
-    strictPort: false, 
+    strictPort: true, 
     watch: {
       usePolling: true, 
     },
     hmr: {
       overlay: false,
+      clientPort: parseInt(process.env.VITE_PORT || '5173'), 
     },
   },
 });

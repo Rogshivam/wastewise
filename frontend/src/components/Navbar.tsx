@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { Menu, X, User, LogOut, Settings, Bell, Trophy, Camera, ShieldCheck, Truck, Users, Gift, Radio } from "lucide-react";
+import { Menu, X, User, LogOut, Settings, Bell, Trophy } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
 interface NavbarProps {
@@ -13,7 +13,6 @@ interface NavbarProps {
 const Navbar = ({ isLoggedIn, userRole, onLoginClick, onLogout }: NavbarProps) => {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
-  const [dashboardsOpen, setDashboardsOpen] = useState(false);
   const location = useLocation();
   const navigate = useNavigate();
 
@@ -27,68 +26,31 @@ const Navbar = ({ isLoggedIn, userRole, onLoginClick, onLogout }: NavbarProps) =
       navigate("/", { state: { scrollTo: target } });
     }
   };
+  const getDashboardLink = () => {
+    if (!isLoggedIn) return "/";
+    if (userRole === "admin") return "/dashboard/admin";
+    if (userRole === "collector") return "/dashboard/collector";
+    return "/dashboard/citizen";
+  };
 
   return (
     <nav className="glass-nav fixed top-0 left-0 right-0 z-50 px-6 py-3">
       <div className="max-w-7xl mx-auto flex items-center justify-between">
         <Link to="/" className="flex items-center gap-2">
-          <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-primary to-eco-teal flex items-center justify-center shadow-md">
+          <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-primary to-eco-teal flex items-center justify-center">
             <span className="text-primary-foreground font-bold text-sm">W</span>
           </div>
           <span className="font-bold text-lg text-foreground">WasteWise AI</span>
         </Link>
 
-        {/* Desktop Navigation Links */}
-        <div className="hidden lg:flex items-center gap-6">
-          <Link to="/" className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">Home</Link>
-          <Link to="/classifier" className="text-sm font-medium text-primary hover:text-primary/80 transition-colors flex items-center gap-1">
-            <Camera className="w-3.5 h-3.5" /> AI Classifier
-          </Link>
-          
-          {/* Dashboards Dropdown */}
-          <div className="relative">
-            <button 
-              onClick={() => setDashboardsOpen(!dashboardsOpen)}
-              onMouseEnter={() => setDashboardsOpen(true)}
-              className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1"
-            >
-              Dashboards ▾
-            </button>
-            <AnimatePresence>
-              {dashboardsOpen && (
-                <motion.div 
-                  initial={{ opacity: 0, y: 6 }} 
-                  animate={{ opacity: 1, y: 0 }} 
-                  exit={{ opacity: 0, y: 6 }} 
-                  onMouseLeave={() => setDashboardsOpen(false)}
-                  className="absolute left-0 top-8 w-52 glass-card-static p-2 z-50 shadow-xl border border-gray-200"
-                >
-                  <Link to="/dashboard/citizen" className="flex items-center gap-2 px-3 py-2 text-sm text-foreground hover:bg-accent rounded-lg transition-colors" onClick={() => setDashboardsOpen(false)}>
-                    <User className="w-4 h-4 text-emerald-600" /> Citizen Portal
-                  </Link>
-                  <Link to="/dashboard/collector" className="flex items-center gap-2 px-3 py-2 text-sm text-foreground hover:bg-accent rounded-lg transition-colors" onClick={() => setDashboardsOpen(false)}>
-                    <Truck className="w-4 h-4 text-teal-600" /> Collector Portal
-                  </Link>
-                  <Link to="/dashboard/admin" className="flex items-center gap-2 px-3 py-2 text-sm text-foreground hover:bg-accent rounded-lg transition-colors" onClick={() => setDashboardsOpen(false)}>
-                    <ShieldCheck className="w-4 h-4 text-purple-600" /> Admin Command
-                  </Link>
-                  <Link to="/tracking" className="flex items-center gap-2 px-3 py-2 text-sm text-foreground hover:bg-accent rounded-lg transition-colors" onClick={() => setDashboardsOpen(false)}>
-                    <Radio className="w-4 h-4 text-amber-600" /> Live GPS Fleet
-                  </Link>
-                </motion.div>
-              )}
-            </AnimatePresence>
-          </div>
+        <div className="hidden md:flex items-center gap-8">
+          <button onClick={() => handleNavClick("hero")} className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">Home</button>
+          <button onClick={() => handleNavClick("features")} className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">Features</button>
+          {/* <button onClick={() => handleNavClick("dashboards")} className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">Dashboards</button> */}
+          <Link to="/community" className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">Community</Link>
+          <Link to="/rewards" className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">Rewards</Link>
+          <Link to="/leaderboard" className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">Leaderboard</Link>
 
-          <Link to="/rewards" className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1">
-            <Gift className="w-3.5 h-3.5" /> Rewards
-          </Link>
-          <Link to="/community" className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1">
-            <Users className="w-3.5 h-3.5" /> Community
-          </Link>
-          <Link to="/leaderboard" className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1">
-            <Trophy className="w-3.5 h-3.5" /> Leaderboard
-          </Link>
         </div>
 
         <div className="hidden md:flex items-center gap-3">
@@ -106,14 +68,8 @@ const Navbar = ({ isLoggedIn, userRole, onLoginClick, onLogout }: NavbarProps) =
                     <Link to="/profile" className="flex items-center gap-2 px-3 py-2 text-sm text-foreground hover:bg-accent rounded-lg transition-colors" onClick={() => setProfileOpen(false)}>
                       <User className="w-4 h-4" /> My Profile
                     </Link>
-                    <Link to="/dashboard/citizen" className="flex items-center gap-2 px-3 py-2 text-sm text-foreground hover:bg-accent rounded-lg transition-colors" onClick={() => setProfileOpen(false)}>
-                      <Settings className="w-4 h-4" /> Citizen Dashboard
-                    </Link>
-                    <Link to="/dashboard/collector" className="flex items-center gap-2 px-3 py-2 text-sm text-foreground hover:bg-accent rounded-lg transition-colors" onClick={() => setProfileOpen(false)}>
-                      <Truck className="w-4 h-4" /> Collector Portal
-                    </Link>
-                    <Link to="/dashboard/admin" className="flex items-center gap-2 px-3 py-2 text-sm text-foreground hover:bg-accent rounded-lg transition-colors" onClick={() => setProfileOpen(false)}>
-                      <ShieldCheck className="w-4 h-4" /> Admin Console
+                    <Link to={getDashboardLink()} className="flex items-center gap-2 px-3 py-2 text-sm text-foreground hover:bg-accent rounded-lg transition-colors" onClick={() => setProfileOpen(false)}>
+                      <Settings className="w-4 h-4" /> {userRole === 'admin' ? 'Admin Console' : userRole === 'collector' ? 'Collector Portal' : 'Citizen Dashboard'}
                     </Link>
                     <Link to="/leaderboard" className="flex items-center gap-2 px-3 py-2 text-sm text-foreground hover:bg-accent rounded-lg transition-colors" onClick={() => setProfileOpen(false)}>
                       <Trophy className="w-4 h-4" /> Leaderboard
@@ -129,34 +85,24 @@ const Navbar = ({ isLoggedIn, userRole, onLoginClick, onLogout }: NavbarProps) =
               </AnimatePresence>
             </div>
           ) : (
-            <div className="flex items-center gap-2">
-              <Link to="/classifier" className="btn-eco text-sm">
-                Scan Waste
-              </Link>
-              <button onClick={onLoginClick} className="btn-eco-outline text-sm">
-                Login
-              </button>
-            </div>
+            <button onClick={onLoginClick} className="btn-eco text-sm">Login</button>
           )}
         </div>
 
-        <button onClick={() => setMobileOpen(!mobileOpen)} className="lg:hidden p-2">
+        <button onClick={() => setMobileOpen(!mobileOpen)} className="md:hidden p-2">
           {mobileOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
         </button>
       </div>
 
       <AnimatePresence>
         {mobileOpen && (
-          <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }} exit={{ opacity: 0, height: 0 }} className="lg:hidden mt-3 pb-4 flex flex-col gap-2">
+          <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }} exit={{ opacity: 0, height: 0 }} className="md:hidden mt-3 pb-4 flex flex-col gap-2">
             <button onClick={() => handleNavClick("hero")} className="px-4 py-2 text-sm text-left text-foreground hover:bg-accent rounded-lg">Home</button>
-            <Link to="/classifier" className="px-4 py-2 text-sm text-foreground hover:bg-accent rounded-lg" onClick={() => setMobileOpen(false)}>AI Classifier</Link>
-            <Link to="/dashboard/citizen" className="px-4 py-2 text-sm text-foreground hover:bg-accent rounded-lg" onClick={() => setMobileOpen(false)}>Citizen Portal</Link>
-            <Link to="/dashboard/collector" className="px-4 py-2 text-sm text-foreground hover:bg-accent rounded-lg" onClick={() => setMobileOpen(false)}>Collector Portal</Link>
-            <Link to="/dashboard/admin" className="px-4 py-2 text-sm text-foreground hover:bg-accent rounded-lg" onClick={() => setMobileOpen(false)}>Admin Command</Link>
-            <Link to="/tracking" className="px-4 py-2 text-sm text-foreground hover:bg-accent rounded-lg" onClick={() => setMobileOpen(false)}>Live GPS Fleet</Link>
+            <button onClick={() => handleNavClick("features")} className="px-4 py-2 text-sm text-left text-foreground hover:bg-accent rounded-lg">Features</button>
+            {/* <button onClick={() => handleNavClick("dashboards")} className="px-4 py-2 text-sm text-left text-foreground hover:bg-accent rounded-lg">Dashboards</button> */}
             <Link to="/community" className="px-4 py-2 text-sm text-foreground hover:bg-accent rounded-lg" onClick={() => setMobileOpen(false)}>Community</Link>
             <Link to="/rewards" className="px-4 py-2 text-sm text-foreground hover:bg-accent rounded-lg" onClick={() => setMobileOpen(false)}>Rewards</Link>
-            <Link to="/leaderboard" className="px-4 py-2 text-sm text-foreground hover:bg-accent rounded-lg" onClick={() => setMobileOpen(false)}>Leaderboard</Link>
+            <Link to="/leaderboard" className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">Leaderboard</Link>
 
             {!isLoggedIn && <button onClick={() => { onLoginClick(); setMobileOpen(false); }} className="btn-eco text-sm mx-4">Login</button>}
           </motion.div>

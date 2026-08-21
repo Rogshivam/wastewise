@@ -21,8 +21,7 @@ import {
   Percent,
   Award,
   ChevronRight,
-  Flame,
-  Truck
+  Flame
 } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useState, useEffect, useMemo } from "react";
