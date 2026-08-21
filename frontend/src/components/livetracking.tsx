@@ -74,24 +74,24 @@ const LiveTracking = () => {
           headers: { 'Authorization': `Bearer ${token}` }
         }).catch(err => {
           console.warn('Failed to fetch collectors:', err);
-          return { ok: false };
+          return null;
         }),
         fetch(`${import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000/api'}/tracking/waste-locations`, {
           headers: { 'Authorization': `Bearer ${token}` }
         }).catch(err => {
           console.warn('Failed to fetch waste locations:', err);
-          return { ok: false };
+          return null;
         })
       ]);
 
-      if (collectorsResponse.ok) {
+      if (collectorsResponse && collectorsResponse.ok) {
         const collectorsData = await collectorsResponse.json();
         if (collectorsData.success && collectorsData.data?.collectors) {
           setCollectors(collectorsData.data.collectors);
         }
       }
 
-      if (wasteResponse.ok) {
+      if (wasteResponse && wasteResponse.ok) {
         const wasteData = await wasteResponse.json();
         if (wasteData.success && wasteData.data) {
           setWastePoints(wasteData.data);

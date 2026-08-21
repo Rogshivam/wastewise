@@ -1,4 +1,4 @@
-import React from 'react';
+import type { FC } from 'react';
 import { 
   Sparkles, 
   Leaf, 
@@ -9,7 +9,18 @@ import {
   TrendingUp,
   Award
 } from 'lucide-react';
-import type { NavTab } from './Navbar';
+export type NavTab = 
+  | 'overview' 
+  | 'citizen-panel' 
+  | 'collector-panel' 
+  | 'admin-panel' 
+  | 'scanner' 
+  | 'radar' 
+  | 'pickups' 
+  | 'rewards' 
+  | 'community' 
+  | 'analytics' 
+  | 'guide';
 
 interface HeroBannerProps {
   onNavigate: (tab: NavTab) => void;

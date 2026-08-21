@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
+import type { FC } from 'react';
 import { 
   Radio, 
   MapPin, 
@@ -16,7 +17,7 @@ interface SmartBinsRadarProps {
   onDispatchTruck: (binId: string) => void;
 }
 
-export const SmartBinsRadar: React.FC<SmartBinsRadarProps> = ({
+export const SmartBinsRadar: FC<SmartBinsRadarProps> = ({
   bins,
   onDispatchTruck
 }) => {

@@ -1,4 +1,7 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
+import type { FC, ChangeEvent } from 'react';
+import * as confettiModule from 'canvas-confetti';
+const confetti = (confettiModule as any).default || confettiModule;
 import { 
   Upload, 
   Sparkles, 
@@ -9,7 +12,6 @@ import {
   ShieldCheck, 
   Leaf 
 } from 'lucide-react';
-import confetti from 'canvas-confetti';
 import type { WasteClassificationResult } from '../types';
 import { DEMO_SCAN_PRESETS } from '../data/mockData';
 
@@ -17,7 +19,7 @@ interface AiScannerProps {
   onEarnPoints: (points: number, reason: string) => void;
 }
 
-export const AiScanner: React.FC<AiScannerProps> = ({ onEarnPoints }) => {
+export const AiScanner: FC<AiScannerProps> = ({ onEarnPoints }) => {
   const [activeItemIndex, setActiveItemIndex] = useState<number>(0);
   const [isScanning, setIsScanning] = useState<boolean>(false);
   const [customImage, setCustomImage] = useState<string | null>(null);
@@ -39,7 +41,7 @@ export const AiScanner: React.FC<AiScannerProps> = ({ onEarnPoints }) => {
     }, 1200);
   };
 
-  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileUpload = (e: ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
       const reader = new FileReader();

@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
+import type { FC, FormEvent } from 'react';
 import { 
   Calendar, 
   Clock, 
@@ -9,15 +10,17 @@ import {
   Sparkles, 
   Plus 
 } from 'lucide-react';
-import confetti from 'canvas-confetti';
+import * as confettiModule from 'canvas-confetti';
 import type { PickupRequest } from '../types';
+
+const confetti = (confettiModule as any).default || confettiModule;
 
 interface PickupSchedulerProps {
   pickups: PickupRequest[];
   onBookPickup: (pickup: PickupRequest) => void;
 }
 
-export const PickupScheduler: React.FC<PickupSchedulerProps> = ({
+export const PickupScheduler: FC<PickupSchedulerProps> = ({
   pickups,
   onBookPickup
 }) => {
@@ -30,7 +33,7 @@ export const PickupScheduler: React.FC<PickupSchedulerProps> = ({
 
   const estimatedPoints = estimatedWeightKg * 15;
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = (e: FormEvent) => {
     e.preventDefault();
     const newPickup: PickupRequest = {
       id: `PU-${Math.floor(1000 + Math.random() * 9000)}`,

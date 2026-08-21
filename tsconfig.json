@@ -2,11 +2,7 @@
   "compilerOptions": {
     "target": "ES2020",
     "useDefineForClassFields": true,
-    "lib": [
-      "ES2020",
-      "DOM",
-      "DOM.Iterable"
-    ],
+    "lib": ["ES2020", "DOM", "DOM.Iterable"],
     "module": "ESNext",
     "skipLibCheck": true,
     "moduleResolution": "bundler",
@@ -22,16 +18,11 @@
     "noUnusedParameters": false,
     "noFallthroughCasesInSwitch": false,
     "noImplicitAny": false,
+    "types": ["node"],
     "paths": {
-      "@/*": [
-        "./src/*"
-      ]
-    },
-    "types": [
-      "vitest/globals"
-    ]
+      "@/*": ["./frontend/src/*"]
+    }
   },
-  "include": [
-    "src"
-  ]
+  "include": ["frontend/src/**/*", "frontend2/src/**/*"],
+  "exclude": ["node_modules", "**/node_modules/*", "dist", "build"]
 }

@@ -160,7 +160,9 @@ const App: React.FC = () => {
   const [detections, setDetections] = useState<Detection[]>([]);
   const [backendOk, setBackendOk] = useState<boolean>(false);
   const [isProcessing, setIsProcessing] = useState<boolean>(false);
-  const [autoLogEnabled, setAutoLogEnabled] = useState<boolean>(false);
+  const [autoLogEnabled, setAutoLogEnabled] = useState<boolean>(true);
+  const [autoLogCountdown, setAutoLogCountdown] = useState<number>(4);
+  const [autoLoggedCount, setAutoLoggedCount] = useState<number>(0);
   const [scanSpeedMs, setScanSpeedMs] = useState<number>(350);
   const [activeTab, setActiveTab] = useState<"dual" | "sheet" | "scanner">("dual");
 
@@ -338,13 +340,15 @@ const App: React.FC = () => {
         setDetections(scaledDetections);
         drawBoxes(scaledDetections);
 
-        // Auto-Log feature with 4-second cooldown
+        // Auto-Log feature: Every 4 seconds automatically log detected items to the spreadsheet
         if (autoLogEnabled && scaledDetections.length > 0) {
-          const top = scaledDetections[0];
           const now = Date.now();
-          if (top.confidence >= 82 && now - lastAutoLogRef.current > 4000) {
+          if (now - lastAutoLogRef.current >= 4000) {
             lastAutoLogRef.current = now;
-            logDetectionToSpreadsheet(top, "YOLO AI Auto-Trigger");
+            scaledDetections.forEach((det, idx) => {
+              logDetectionToSpreadsheet(det, `Auto-Logged (4s Cycle #${autoLoggedCount + idx + 1})`);
+            });
+            setAutoLoggedCount(prev => prev + scaledDetections.length);
           }
         }
       }
@@ -352,7 +356,7 @@ const App: React.FC = () => {
       console.error("Frame classification error:", err);
     }
     setIsProcessing(false);
-  }, [backendOk, isProcessing, isFrozen, autoLogEnabled, drawBoxes]);
+  }, [backendOk, isProcessing, isFrozen, autoLogEnabled, autoLoggedCount, drawBoxes]);
 
   // ─── CAMERA TOGGLE ───
   const toggleCamera = async () => {
@@ -400,6 +404,20 @@ const App: React.FC = () => {
       if (intervalRef.current) clearInterval(intervalRef.current);
     };
   }, [sendFrame, isCameraOn, isFrozen, scanSpeedMs]);
+
+  // ─── 4-SECOND AUTO-LOG COUNTDOWN TIMER ───
+  useEffect(() => {
+    if (!isCameraOn || isFrozen || !autoLogEnabled) {
+      setAutoLogCountdown(4);
+      return;
+    }
+    const timer = setInterval(() => {
+      const elapsed = Date.now() - lastAutoLogRef.current;
+      const remaining = Math.max(0, 4 - Math.floor(elapsed / 1000));
+      setAutoLogCountdown(remaining === 0 ? 4 : remaining);
+    }, 500);
+    return () => clearInterval(timer);
+  }, [isCameraOn, isFrozen, autoLogEnabled]);
 
   // ─── LOG DETECTION TO SPREADSHEET ───
   const logDetectionToSpreadsheet = (det: Detection, customNotes?: string) => {
@@ -922,35 +940,49 @@ const App: React.FC = () => {
               </div>
 
               {/* Auxiliary Controls (Auto-Log & Speed) */}
-              <div className="scanner-aux-controls">
-                <label className="toggle-switch">
-                  <input
-                    type="checkbox"
-                    checked={autoLogEnabled}
-                    onChange={(e) => setAutoLogEnabled(e.target.checked)}
-                  />
-                  <span>Auto-Log High Confidence (&gt;80%)</span>
-                </label>
+              <div className="scanner-aux-controls" style={{ display: "flex", flexDirection: "column", gap: "10px", background: "rgba(22, 163, 74, 0.06)", padding: "10px 14px", borderRadius: "10px", border: "1px solid rgba(22, 163, 74, 0.2)" }}>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: "8px" }}>
+                  <label className="toggle-switch" style={{ display: "flex", alignItems: "center", gap: "8px", cursor: "pointer" }}>
+                    <input
+                      type="checkbox"
+                      checked={autoLogEnabled}
+                      onChange={(e) => setAutoLogEnabled(e.target.checked)}
+                    />
+                    <span style={{ fontWeight: 700, fontSize: "0.85rem", color: autoLogEnabled ? "#16a34a" : "var(--muted)" }}>
+                      Auto-Log to Spreadsheet (Every 4s)
+                    </span>
+                  </label>
 
-                <div style={{ display: "flex", alignItems: "center", gap: 8, fontSize: "0.8rem", color: "var(--muted)" }}>
-                  <SlidersHorizontal size={14} />
-                  <span>Scan rate:</span>
-                  <select
-                    value={scanSpeedMs}
-                    onChange={(e) => setScanSpeedMs(Number(e.target.value))}
-                    style={{
-                      padding: "4px 8px",
-                      borderRadius: 6,
-                      border: "1px solid var(--border)",
-                      fontSize: "0.78rem",
-                      fontWeight: 600,
-                    }}
-                  >
-                    <option value={1000}>Fast (1.0s)</option>
-                    <option value={1800}>Smooth / Stable (1.8s)</option>
-                    <option value={3000}>Relaxed (3.0s)</option>
-                  </select>
+                  <div style={{ display: "flex", alignItems: "center", gap: 8, fontSize: "0.8rem", color: "var(--muted)" }}>
+                    <SlidersHorizontal size={14} />
+                    <span>AI Stream Rate:</span>
+                    <select
+                      value={scanSpeedMs}
+                      onChange={(e) => setScanSpeedMs(Number(e.target.value))}
+                      style={{
+                        padding: "4px 8px",
+                        borderRadius: 6,
+                        border: "1px solid var(--border)",
+                        fontSize: "0.78rem",
+                        fontWeight: 600,
+                      }}
+                    >
+                      <option value={350}>Ultra-Fast (350ms)</option>
+                      <option value={1000}>Standard (1.0s)</option>
+                      <option value={2000}>Relaxed (2.0s)</option>
+                    </select>
+                  </div>
                 </div>
+
+                {autoLogEnabled && (
+                  <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", fontSize: "0.78rem", color: "#16a34a", fontWeight: 600, borderTop: "1px dashed rgba(22, 163, 74, 0.3)", paddingTop: "6px" }}>
+                    <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+                      <span className="live-pulse-dot" style={{ display: "inline-block", width: "8px", height: "8px", borderRadius: "50%", background: "#16a34a" }} />
+                      <span>{isCameraOn ? `Auto-logging every 4s • Next log in ${autoLogCountdown}s` : "Start camera to begin 4-second auto-logging"}</span>
+                    </div>
+                    <span>Total Auto-Logged: <strong>{autoLoggedCount}</strong> items</span>
+                  </div>
+                )}
               </div>
 
               {/* Live Detection Result Card */}
