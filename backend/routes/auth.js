@@ -5,8 +5,10 @@ const User = require('../models/User');
 const router = express.Router();
 
 // Generate JWT Token
+const JWT_SECRET = process.env.JWT_SECRET || 'wastewise_jwt_secret_key_2026_production';
+
 const generateToken = (id) => {
-  return jwt.sign({ id }, process.env.JWT_SECRET, {
+  return jwt.sign({ id }, JWT_SECRET, {
     expiresIn: process.env.JWT_EXPIRE || '7d',
   });
 };

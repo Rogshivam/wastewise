@@ -14,7 +14,7 @@ const CollectorDashboard = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [isUpdatingStatus, setIsUpdatingStatus] = useState(false);
-  
+
   const { user, isAuthenticated } = useAuth();
   const { toast } = useToast();
 
@@ -47,23 +47,23 @@ const CollectorDashboard = () => {
 
   const handleRouteToggle = async () => {
     if (!user) return;
-    
+
     // If no route exists in database, generate fallback route code or id
     const routeIdentifier = dashboardData?.currentRoute?.id || dashboardData?.currentRoute?.routeCode || "DELHI-CENTRAL-01";
 
     try {
       setIsUpdatingStatus(true);
       const newStatus = routeStarted ? 'assigned' : 'in_progress';
-      
+
       await updateRouteStatus(routeIdentifier, newStatus);
-      
+
       const newRouteStarted = !routeStarted;
       setRouteStarted(newRouteStarted);
-      
+
       toast({
         title: newRouteStarted ? "Route Started" : "Route Stopped",
-        description: newRouteStarted 
-          ? "Garbage collection route is now active! Live location broadcasting initialized." 
+        description: newRouteStarted
+          ? "Garbage collection route is now active! Live location broadcasting initialized."
           : "Route paused. Status updated to assigned.",
       });
 
@@ -138,8 +138,8 @@ const CollectorDashboard = () => {
       <div className="min-h-screen pt-20 flex items-center justify-center">
         <div className="text-center glass-card-static p-6 rounded-xl max-w-md">
           <p className="text-eco-rose mb-4">{error}</p>
-          <button 
-            onClick={() => window.location.reload()} 
+          <button
+            onClick={() => window.location.reload()}
             className="btn-eco"
           >
             Try Again
@@ -166,13 +166,12 @@ const CollectorDashboard = () => {
             <div>
               <h1 className="text-2xl font-bold text-foreground flex items-center gap-2">
                 Garbage Collector Dashboard
-                <span className={`text-xs px-2.5 py-1 rounded-full font-bold uppercase border ${
-                  collectorStatus === 'active' || collectorStatus === 'in_progress'
+                <span className={`text-xs px-2.5 py-1 rounded-full font-bold uppercase border ${collectorStatus === 'active' || collectorStatus === 'in_progress'
                     ? 'bg-emerald-500/10 text-emerald-600 border-emerald-500/20'
                     : collectorStatus === 'busy'
-                    ? 'bg-amber-500/10 text-amber-600 border-amber-500/20'
-                    : 'bg-slate-500/10 text-slate-600 border-slate-500/20'
-                }`}>
+                      ? 'bg-amber-500/10 text-amber-600 border-amber-500/20'
+                      : 'bg-slate-500/10 text-slate-600 border-slate-500/20'
+                  }`}>
                   ● {collectorStatus}
                 </span>
               </h1>
@@ -212,7 +211,7 @@ const CollectorDashboard = () => {
                 <h3 className="text-lg font-semibold text-foreground">Assigned Route Overview</h3>
                 <span className="text-xs text-muted-foreground">Delhi Central Zone</span>
               </div>
-              
+
               <div className="mb-4 p-4 rounded-xl bg-accent/30 border border-border flex items-center justify-between">
                 <div>
                   <p className="text-xl font-bold text-foreground">
@@ -223,9 +222,8 @@ const CollectorDashboard = () => {
                   </p>
                 </div>
                 <div className="text-right">
-                  <span className={`px-3 py-1 text-xs font-bold rounded-full ${
-                    routeStarted ? 'bg-emerald-500/10 text-emerald-600 border border-emerald-500/20 animate-pulse' : 'bg-amber-500/10 text-amber-600 border border-amber-500/20'
-                  }`}>
+                  <span className={`px-3 py-1 text-xs font-bold rounded-full ${routeStarted ? 'bg-emerald-500/10 text-emerald-600 border border-emerald-500/20 animate-pulse' : 'bg-amber-500/10 text-amber-600 border border-amber-500/20'
+                    }`}>
                     {routeStarted ? "● ON ROUTE" : "PENDING"}
                   </span>
                 </div>
@@ -240,20 +238,19 @@ const CollectorDashboard = () => {
                   <span className="text-xs text-muted-foreground">Status Broadcast:</span>
                   <span className="text-xs font-bold text-emerald-600">LIVE SOCKET CONNECTED</span>
                 </div>
-                
+
                 <div className="flex items-center gap-2">
                   <Star className="w-4 h-4 text-eco-amber" />
                   <span className="text-sm font-semibold text-foreground">{dashboardData?.rewardPoints || 120}</span>
                 </div>
 
-                <button 
+                <button
                   onClick={handleRouteToggle}
                   disabled={isUpdatingStatus}
-                  className={`flex items-center gap-2 px-5 py-2.5 rounded-xl font-bold text-xs transition-all shadow-md ${
-                    routeStarted 
-                      ? "bg-rose-500 hover:bg-rose-600 text-white" 
+                  className={`flex items-center gap-2 px-5 py-2.5 rounded-xl font-bold text-xs transition-all shadow-md ${routeStarted
+                      ? "bg-rose-500 hover:bg-rose-600 text-white"
                       : "bg-emerald-600 hover:bg-emerald-700 text-white"
-                  } disabled:opacity-50`}
+                    } disabled:opacity-50`}
                 >
                   <Power className="w-3.5 h-3.5" />
                   {routeStarted ? "Stop Route Duty" : "Start Route Duty"}
@@ -282,11 +279,10 @@ const CollectorDashboard = () => {
                         </div>
                         <div className="flex items-center gap-2">
                           <span className="text-[11px] text-muted-foreground">{p.time}</span>
-                          <span className={`text-[10px] px-2 py-0.5 rounded-full font-bold ${
-                            p.status === "Completing" || p.status === "Completed" 
-                              ? "bg-emerald-500/10 text-emerald-600" 
+                          <span className={`text-[10px] px-2 py-0.5 rounded-full font-bold ${p.status === "Completing" || p.status === "Completed"
+                              ? "bg-emerald-500/10 text-emerald-600"
                               : "bg-amber-500/10 text-amber-600"
-                          }`}>
+                            }`}>
                             {p.status}
                           </span>
                         </div>
@@ -330,22 +326,22 @@ const CollectorDashboard = () => {
                   <>
                     <div className="text-center p-3 rounded-xl bg-accent/30 border border-border">
                       <span className="text-[11px] font-bold text-emerald-600 mb-1 block">Connaught Place</span>
-                      <p className="stat-value text-xl font-extrabold text-foreground">185 kg</p>
+                      <p className="stat-value text-xl font-extrabold text-foreground">185PSCs</p>
                       <p className="stat-label text-[10px] text-muted-foreground mt-0.5">Collection Points</p>
                     </div>
                     <div className="text-center p-3 rounded-xl bg-accent/30 border border-border">
                       <span className="text-[11px] font-bold text-emerald-600 mb-1 block">Lajpat Nagar</span>
-                      <p className="stat-value text-xl font-extrabold text-foreground">240 kg</p>
+                      <p className="stat-value text-xl font-extrabold text-foreground">240PSCs</p>
                       <p className="stat-label text-[10px] text-muted-foreground mt-0.5">Collection Points</p>
                     </div>
                     <div className="text-center p-3 rounded-xl bg-accent/30 border border-border">
                       <span className="text-[11px] font-bold text-emerald-600 mb-1 block">Green Park</span>
-                      <p className="stat-value text-xl font-extrabold text-foreground">195 kg</p>
+                      <p className="stat-value text-xl font-extrabold text-foreground">195PSCs</p>
                       <p className="stat-label text-[10px] text-muted-foreground mt-0.5">Collection Points</p>
                     </div>
                     <div className="text-center p-3 rounded-xl bg-accent/30 border border-border">
                       <span className="text-[11px] font-bold text-emerald-600 mb-1 block">Hauz Khas</span>
-                      <p className="stat-value text-xl font-extrabold text-foreground">160 kg</p>
+                      <p className="stat-value text-xl font-extrabold text-foreground">160PSCs</p>
                       <p className="stat-label text-[10px] text-muted-foreground mt-0.5">Collection Points</p>
                     </div>
                   </>

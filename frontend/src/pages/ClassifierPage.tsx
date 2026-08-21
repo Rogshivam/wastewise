@@ -77,7 +77,7 @@ const INITIAL_SPREADSHEET_DATA: CollectorWasteRecord[] = [
     tacoSupercat: "Bottle",
     category: "recyclable",
     bin: "Blue Bin (PET/HDPE)",
-    weightKg: 84.5,
+    weightKg: 85,
     purityScore: 97,
     status: "Verified & Processed",
     notes: "Baled & segregated at South Delhi Recovery Center",
@@ -94,7 +94,7 @@ const INITIAL_SPREADSHEET_DATA: CollectorWasteRecord[] = [
     tacoSupercat: "Food waste",
     category: "biodegradable",
     bin: "Green Bin (Compost)",
-    weightKg: 162.0,
+    weightKg: 162,
     purityScore: 94,
     status: "Verified & Processed",
     notes: "Direct transfer to Okhla Bio-Methanation Compost Plant",
@@ -111,7 +111,7 @@ const INITIAL_SPREADSHEET_DATA: CollectorWasteRecord[] = [
     tacoSupercat: "Battery",
     category: "hazardous",
     bin: "Red Bin (Hazardous)",
-    weightKg: 18.2,
+    weightKg: 18,
     purityScore: 99,
     status: "Dispatched to Recycler",
     notes: "Sent to Authorized Central E-Waste Facility",
@@ -128,7 +128,7 @@ const INITIAL_SPREADSHEET_DATA: CollectorWasteRecord[] = [
     tacoSupercat: "Carton",
     category: "recyclable",
     bin: "Blue Bin (Paper/Carton)",
-    weightKg: 115.0,
+    weightKg: 115,
     purityScore: 96,
     status: "Verified & Processed",
     notes: "High-grade kraft paper fiber for circular mill repulping",
@@ -145,7 +145,7 @@ const INITIAL_SPREADSHEET_DATA: CollectorWasteRecord[] = [
     tacoSupercat: "Can",
     category: "recyclable",
     bin: "Blue Bin (Metals)",
-    weightKg: 46.8,
+    weightKg: 47,
     purityScore: 98,
     status: "Verified & Processed",
     notes: "Infinitely recyclable aluminium alloy",
@@ -162,7 +162,7 @@ const INITIAL_SPREADSHEET_DATA: CollectorWasteRecord[] = [
     tacoSupercat: "Food waste",
     category: "biodegradable",
     bin: "Green Bin (Organic)",
-    weightKg: 210.5,
+    weightKg: 211,
     purityScore: 92,
     status: "Depot Sorting",
     notes: "Pre-shredding for municipal green cover composting",
@@ -231,10 +231,10 @@ const ClassifierPage: React.FC = () => {
 
     return {
       totalEntries: records.length,
-      totalKg: totalKg.toFixed(1),
-      bioKg: bioKg.toFixed(1),
-      recKg: recKg.toFixed(1),
-      hazKg: hazKg.toFixed(1),
+      totalKg: Math.round(totalKg),
+      bioKg: Math.round(bioKg),
+      recKg: Math.round(recKg),
+      hazKg: Math.round(hazKg),
       avgPurity,
     };
   }, [records]);
@@ -351,7 +351,7 @@ const ClassifierPage: React.FC = () => {
       tacoSupercat: "Plastic container",
       category: "recyclable",
       bin: CATEGORY_BINS.recyclable,
-      weightKg: 50.0,
+      weightKg: 50,
       purityScore: 95,
       status: "Verified & Processed",
       notes: "Logged via MCD Administrative Terminal",
@@ -406,7 +406,7 @@ const ClassifierPage: React.FC = () => {
   return (
     <div className="min-h-screen pt-24 pb-20 px-4 md:px-8 bg-gradient-to-b from-emerald-50/50 via-slate-50 to-white text-slate-800">
       <div className="max-w-7xl mx-auto space-y-8">
-        
+
         {/* ─── PAGE HEADER & BANNER ─── */}
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 pb-6 border-b border-slate-200">
           <div>
@@ -447,11 +447,10 @@ const ClassifierPage: React.FC = () => {
                     : "Read-Only User Mode Enabled"
                 );
               }}
-              className={`inline-flex items-center gap-2 px-3.5 py-2.5 rounded-xl text-xs font-bold transition-all border shadow-sm ${
-                isAdmin
+              className={`inline-flex items-center gap-2 px-3.5 py-2.5 rounded-xl text-xs font-bold transition-all border shadow-sm ${isAdmin
                   ? "bg-slate-900 text-white border-slate-900 shadow-slate-900/20"
                   : "bg-white text-slate-700 border-slate-300 hover:bg-slate-50"
-              }`}
+                }`}
               title="Toggle Administrator Management Capabilities"
             >
               {isAdmin ? (
@@ -475,7 +474,7 @@ const ClassifierPage: React.FC = () => {
             <span className="text-xs font-bold text-slate-500 uppercase tracking-wider block mb-1">
               Total Logged
             </span>
-            <span className="text-2xl font-black text-slate-900">{stats.totalKg} <span className="text-xs font-semibold text-slate-500">kg</span></span>
+            <span className="text-2xl font-black text-slate-900">{stats.totalKg} <span className="text-xs font-semibold text-slate-500">pcs</span></span>
             <span className="text-[11px] font-medium text-emerald-600 block mt-1">
               {stats.totalEntries} verified batches
             </span>
@@ -485,7 +484,7 @@ const ClassifierPage: React.FC = () => {
             <span className="text-xs font-bold text-emerald-800 uppercase tracking-wider block mb-1">
               🌱 Biodegradable
             </span>
-            <span className="text-2xl font-black text-emerald-700">{stats.bioKg} <span className="text-xs font-semibold text-emerald-600">kg</span></span>
+            <span className="text-2xl font-black text-emerald-700">{stats.bioKg} <span className="text-xs font-semibold text-emerald-600">pcs</span></span>
             <span className="text-[11px] font-medium text-emerald-600 block mt-1">
               Organic Compostable
             </span>
@@ -495,7 +494,7 @@ const ClassifierPage: React.FC = () => {
             <span className="text-xs font-bold text-blue-800 uppercase tracking-wider block mb-1">
               ♻️ Recyclable
             </span>
-            <span className="text-2xl font-black text-blue-700">{stats.recKg} <span className="text-xs font-semibold text-blue-600">kg</span></span>
+            <span className="text-2xl font-black text-blue-700">{stats.recKg} <span className="text-xs font-semibold text-blue-600">pcs</span></span>
             <span className="text-[11px] font-medium text-blue-600 block mt-1">
               Circular Packaging
             </span>
@@ -505,7 +504,7 @@ const ClassifierPage: React.FC = () => {
             <span className="text-xs font-bold text-red-800 uppercase tracking-wider block mb-1">
               ⚠️ Hazardous
             </span>
-            <span className="text-2xl font-black text-red-700">{stats.hazKg} <span className="text-xs font-semibold text-red-600">kg</span></span>
+            <span className="text-2xl font-black text-red-700">{stats.hazKg} <span className="text-xs font-semibold text-red-600">pcs</span></span>
             <span className="text-[11px] font-medium text-red-600 block mt-1">
               Specialized Treatment
             </span>
@@ -534,10 +533,10 @@ const ClassifierPage: React.FC = () => {
 
         {/* ─── SPREADSHEET TOOLBAR & CONTROLS ─── */}
         <div className="p-5 rounded-2xl bg-white/90 backdrop-blur-md border border-slate-200/80 shadow-sm space-y-4">
-          
+
           {/* Top Row: Search & Export Controls */}
           <div className="flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-4">
-            
+
             {/* Search Input */}
             <div className="relative flex-1 min-w-[280px]">
               <Search className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
@@ -612,41 +611,37 @@ const ClassifierPage: React.FC = () => {
               </span>
               <button
                 onClick={() => setCategoryFilter("all")}
-                className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
-                  categoryFilter === "all"
+                className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${categoryFilter === "all"
                     ? "bg-slate-900 text-white"
                     : "bg-slate-100 text-slate-600 hover:bg-slate-200"
-                }`}
+                  }`}
               >
                 All Streams ({records.length})
               </button>
               <button
                 onClick={() => setCategoryFilter("biodegradable")}
-                className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
-                  categoryFilter === "biodegradable"
+                className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${categoryFilter === "biodegradable"
                     ? "bg-emerald-600 text-white"
                     : "bg-emerald-50 text-emerald-700 hover:bg-emerald-100"
-                }`}
+                  }`}
               >
                 🌱 Biodegradable
               </button>
               <button
                 onClick={() => setCategoryFilter("recyclable")}
-                className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
-                  categoryFilter === "recyclable"
+                className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${categoryFilter === "recyclable"
                     ? "bg-blue-600 text-white"
                     : "bg-blue-50 text-blue-700 hover:bg-blue-100"
-                }`}
+                  }`}
               >
                 ♻️ Recyclable
               </button>
               <button
                 onClick={() => setCategoryFilter("hazardous")}
-                className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
-                  categoryFilter === "hazardous"
+                className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${categoryFilter === "hazardous"
                     ? "bg-red-600 text-white"
                     : "bg-red-50 text-red-700 hover:bg-red-100"
-                }`}
+                  }`}
               >
                 ⚠️ Hazardous
               </button>
@@ -723,7 +718,7 @@ const ClassifierPage: React.FC = () => {
                   <th className="py-3.5 px-4">Sorting Depot / Zone</th>
                   <th className="py-3.5 px-4">Classified Waste Item</th>
                   <th className="py-3.5 px-4">Stream</th>
-                  <th className="py-3.5 px-4">Weight</th>
+                  <th className="py-3.5 px-4">Quantity</th>
                   <th className="py-3.5 px-4">Purity</th>
                   <th className="py-3.5 px-4">Verification Officer</th>
                   <th className="py-3.5 px-4">Processing Status</th>
@@ -752,7 +747,7 @@ const ClassifierPage: React.FC = () => {
                           />
                         </td>
                       )}
-                      
+
                       <td className="py-3.5 px-4 font-mono font-bold text-xs text-slate-800">
                         {row.id}
                       </td>
@@ -782,13 +777,12 @@ const ClassifierPage: React.FC = () => {
 
                       <td className="py-3.5 px-4">
                         <span
-                          className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold ${
-                            row.category === "biodegradable"
+                          className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold ${row.category === "biodegradable"
                               ? "bg-emerald-100/80 text-emerald-800"
                               : row.category === "recyclable"
-                              ? "bg-blue-100/80 text-blue-800"
-                              : "bg-red-100/80 text-red-800"
-                          }`}
+                                ? "bg-blue-100/80 text-blue-800"
+                                : "bg-red-100/80 text-red-800"
+                            }`}
                         >
                           {row.category === "biodegradable" && "🌱"}
                           {row.category === "recyclable" && "♻️"}
@@ -798,7 +792,7 @@ const ClassifierPage: React.FC = () => {
                       </td>
 
                       <td className="py-3.5 px-4 font-bold text-slate-900 text-xs">
-                        {row.weightKg} kg
+                        {Math.round(row.weightKg)} pcs
                       </td>
 
                       <td className="py-3.5 px-4">
@@ -827,13 +821,12 @@ const ClassifierPage: React.FC = () => {
 
                       <td className="py-3.5 px-4">
                         <span
-                          className={`inline-flex items-center px-2.5 py-0.5 rounded-md text-[11px] font-bold ${
-                            row.status === "Verified & Processed"
+                          className={`inline-flex items-center px-2.5 py-0.5 rounded-md text-[11px] font-bold ${row.status === "Verified & Processed"
                               ? "bg-emerald-50 text-emerald-700 border border-emerald-200"
                               : row.status === "Dispatched to Recycler"
-                              ? "bg-blue-50 text-blue-700 border border-blue-200"
-                              : "bg-amber-50 text-amber-700 border border-amber-200"
-                          }`}
+                                ? "bg-blue-50 text-blue-700 border border-blue-200"
+                                : "bg-amber-50 text-amber-700 border border-amber-200"
+                            }`}
                         >
                           {row.status}
                         </span>
@@ -998,18 +991,18 @@ const ClassifierPage: React.FC = () => {
 
                 <div>
                   <label className="block text-xs font-bold text-slate-600 uppercase mb-1">
-                    Batch Weight (Kg) *
+                    Quantity (pcs) *
                   </label>
                   <input
                     type="number"
-                    step="0.1"
-                    min="0.1"
+                    step="1"
+                    min="1"
                     required
                     value={editingRecord.weightKg}
                     onChange={(e) =>
                       setEditingRecord({
                         ...editingRecord,
-                        weightKg: parseFloat(e.target.value) || 0,
+                        weightKg: parseInt(e.target.value, 10) || 0,
                       })
                     }
                     className="w-full px-3.5 py-2 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500"

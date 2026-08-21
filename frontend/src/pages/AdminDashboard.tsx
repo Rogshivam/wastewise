@@ -25,7 +25,7 @@ const AdminDashboard = () => {
   const [showNotifications, setShowNotifications] = useState(false);
   const [showAlertModal, setShowAlertModal] = useState(false);
   const [alertMessage, setAlertMessage] = useState("");
-  
+
   // Section toggle for User Directory (Citizens, Collectors, Admins)
   const [userTabSection, setUserTabSection] = useState<'citizens' | 'collectors' | 'admins'>('citizens');
   // Section toggle for Feedback
@@ -133,12 +133,12 @@ const AdminDashboard = () => {
     let csv = "";
     if (filenamePrefix.includes("users")) {
       csv = "User_ID,Username,Email,First_Name,Last_Name,Phone,Zone,Address,Reward_Points,Vehicle_Number,Created_At\n" +
-        dataArray.map(u => 
+        dataArray.map(u =>
           `"${u._id}","${u.username}","${u.email}","${u.profile?.firstName || ''}","${u.profile?.lastName || ''}","${u.profile?.phone || ''}","${u.profile?.zone || ''}","${u.profile?.address || ''}","${u.rewardPoints || 0}","${u.vehicleNumber || 'N/A'}","${u.createdAt || ''}"`
         ).join("\n");
     } else if (filenamePrefix.includes("feedback")) {
       csv = "Feedback_ID,User_Name,Email,Category,Feedback_Content,Location,Rating_Stars,Status,Date\n" +
-        dataArray.map(f => 
+        dataArray.map(f =>
           `"${f.id}","${f.user}","${f.email}","${f.category}","${f.feedback}","${f.location}","${f.rating}","${f.status}","${f.date}"`
         ).join("\n");
     } else {
@@ -187,11 +187,10 @@ const AdminDashboard = () => {
           <button
             key={item.label}
             onClick={() => setActiveTab(i)}
-            className={`w-full py-2.5 px-2 rounded-xl flex flex-col items-center gap-1 transition-all ${
-              activeTab === i 
-                ? "bg-primary text-primary-foreground shadow-lg font-bold scale-105" 
+            className={`w-full py-2.5 px-2 rounded-xl flex flex-col items-center gap-1 transition-all ${activeTab === i
+                ? "bg-primary text-primary-foreground shadow-lg font-bold scale-105"
                 : "text-muted-foreground hover:bg-accent hover:text-foreground"
-            }`}
+              }`}
             title={item.label}
           >
             <item.icon className="w-5 h-5" />
@@ -233,11 +232,11 @@ const AdminDashboard = () => {
               </div>
 
               {/* Refresh Button */}
-              <button 
+              <button
                 onClick={() => {
                   refetch();
                   toast({ title: "Console Refreshed", description: "Fetched latest system telemetry." });
-                }} 
+                }}
                 className="p-2.5 rounded-xl border border-border bg-card hover:bg-accent transition-colors"
                 title="Refresh Console"
               >
@@ -295,7 +294,7 @@ const AdminDashboard = () => {
                   <div className="w-10 h-10 rounded-xl bg-emerald-500/10 text-emerald-600 flex items-center justify-center font-bold">♻️</div>
                   <div>
                     <p className="text-[10px] text-muted-foreground uppercase font-bold">Total Waste</p>
-                    <p className="text-xl font-extrabold text-foreground">{data?.stats?.totalCollections || 1420} kg</p>
+                    <p className="text-xl font-extrabold text-foreground">{data?.stats?.totalCollections || 1420}PSCs</p>
                   </div>
                 </div>
                 <div className="glass-card-static p-4 rounded-xl border border-border flex items-center gap-3">
@@ -401,9 +400,8 @@ const AdminDashboard = () => {
               <div className="flex items-center gap-2 p-1 bg-accent/40 rounded-xl w-fit border border-border">
                 <button
                   onClick={() => setUserTabSection('citizens')}
-                  className={`px-4 py-2 rounded-lg text-xs font-bold transition-all flex items-center gap-2 ${
-                    userTabSection === 'citizens' ? 'bg-primary text-primary-foreground shadow-md' : 'text-muted-foreground hover:text-foreground'
-                  }`}
+                  className={`px-4 py-2 rounded-lg text-xs font-bold transition-all flex items-center gap-2 ${userTabSection === 'citizens' ? 'bg-primary text-primary-foreground shadow-md' : 'text-muted-foreground hover:text-foreground'
+                    }`}
                 >
                   <UserCheck className="w-3.5 h-3.5" />
                   Citizens ({usersData.citizens.length})
@@ -411,9 +409,8 @@ const AdminDashboard = () => {
 
                 <button
                   onClick={() => setUserTabSection('collectors')}
-                  className={`px-4 py-2 rounded-lg text-xs font-bold transition-all flex items-center gap-2 ${
-                    userTabSection === 'collectors' ? 'bg-primary text-primary-foreground shadow-md' : 'text-muted-foreground hover:text-foreground'
-                  }`}
+                  className={`px-4 py-2 rounded-lg text-xs font-bold transition-all flex items-center gap-2 ${userTabSection === 'collectors' ? 'bg-primary text-primary-foreground shadow-md' : 'text-muted-foreground hover:text-foreground'
+                    }`}
                 >
                   <Truck className="w-3.5 h-3.5" />
                   Collectors ({usersData.collectors.length})
@@ -421,9 +418,8 @@ const AdminDashboard = () => {
 
                 <button
                   onClick={() => setUserTabSection('admins')}
-                  className={`px-4 py-2 rounded-lg text-xs font-bold transition-all flex items-center gap-2 ${
-                    userTabSection === 'admins' ? 'bg-primary text-primary-foreground shadow-md' : 'text-muted-foreground hover:text-foreground'
-                  }`}
+                  className={`px-4 py-2 rounded-lg text-xs font-bold transition-all flex items-center gap-2 ${userTabSection === 'admins' ? 'bg-primary text-primary-foreground shadow-md' : 'text-muted-foreground hover:text-foreground'
+                    }`}
                 >
                   <ShieldCheck className="w-3.5 h-3.5" />
                   Admins ({usersData.admins.length})
@@ -560,9 +556,8 @@ const AdminDashboard = () => {
                           {f.rating} <Star className="w-3 h-3 fill-amber-500 text-amber-500" />
                         </td>
                         <td className="p-3">
-                          <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase ${
-                            f.status === 'Resolved' ? 'bg-emerald-500/10 text-emerald-600' : 'bg-amber-500/10 text-amber-600'
-                          }`}>
+                          <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase ${f.status === 'Resolved' ? 'bg-emerald-500/10 text-emerald-600' : 'bg-amber-500/10 text-amber-600'
+                            }`}>
                             {f.status}
                           </span>
                         </td>

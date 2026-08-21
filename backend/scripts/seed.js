@@ -10,7 +10,7 @@ const RewardTransaction = require('../models/RewardTransaction');
 
 try {
   dns.setServers(['8.8.8.8', '8.8.4.4']);
-} catch (e) {}
+} catch (e) { }
 
 const seedUsers = async () => {
   try {
@@ -541,7 +541,7 @@ const seedUsers = async () => {
             location: colUser.location || { type: 'Point', coordinates: [77.2090, 28.6139] },
             completedAt: new Date(Date.now() - 1000 * 3600 * 12 * Math.floor(Math.random() * 7 + 1)),
             rewardPoints: col.pts,
-            notes: `Cleared ${col.dry + col.wet + col.haz} kg of verified segregated municipal waste`
+            notes: `Cleared ${col.dry + col.wet + col.haz}PSCs of verified segregated municipal waste`
           });
         }
       }

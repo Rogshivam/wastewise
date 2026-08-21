@@ -1,8 +1,8 @@
 import { motion, AnimatePresence } from "framer-motion";
-import { 
-  Trophy, Star, Medal, Users, Target, Award, Search, Building2, Leaf, 
-  Truck, ShieldCheck, CheckCircle2, MapPin, Zap, ArrowUpRight, X, 
-  Calendar, Flame, Sparkles, Filter, Activity, BarChart3, ChevronRight 
+import {
+  Trophy, Star, Medal, Users, Target, Award, Search, Building2, Leaf,
+  Truck, ShieldCheck, CheckCircle2, MapPin, Zap, ArrowUpRight, X,
+  Calendar, Flame, Sparkles, Filter, Activity, BarChart3, ChevronRight
 } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useState, useEffect, useMemo } from "react";
@@ -149,7 +149,7 @@ const LeaderboardPage = () => {
 
   if (!isAuthenticated) return (
     <div className="min-h-screen pt-28 pb-16 flex items-center justify-center px-4">
-      <motion.div 
+      <motion.div
         initial={{ opacity: 0, scale: 0.95 }}
         animate={{ opacity: 1, scale: 1 }}
         className="text-center glass-card-static p-8 rounded-3xl max-w-md border border-border shadow-2xl"
@@ -220,7 +220,7 @@ const LeaderboardPage = () => {
 
           {/* ─── Tabs & Filters Toolbar ─── */}
           <div className="flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-3 mb-6">
-            
+
             {/* Role Tabs */}
             <div className="flex p-1 bg-muted/60 backdrop-blur-md rounded-2xl border border-border overflow-x-auto">
               {TABS.map(t => {
@@ -230,17 +230,15 @@ const LeaderboardPage = () => {
                   <button
                     key={t.id}
                     onClick={() => { setTab(t.id); setSearch(''); setSelectedZone('All'); }}
-                    className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs md:text-sm font-semibold transition-all whitespace-nowrap ${
-                      active
+                    className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs md:text-sm font-semibold transition-all whitespace-nowrap ${active
                         ? 'bg-background text-foreground shadow-md border border-border'
                         : 'text-muted-foreground hover:text-foreground hover:bg-background/40'
-                    }`}
+                      }`}
                   >
                     <Icon className={`w-4 h-4 ${active ? 'text-primary' : ''}`} />
                     <span>{t.label}</span>
-                    <span className={`text-[10px] px-1.5 py-0.5 rounded-full font-bold ${
-                      active ? 'bg-primary text-primary-foreground' : 'bg-muted-foreground/20 text-muted-foreground'
-                    }`}>
+                    <span className={`text-[10px] px-1.5 py-0.5 rounded-full font-bold ${active ? 'bg-primary text-primary-foreground' : 'bg-muted-foreground/20 text-muted-foreground'
+                      }`}>
                       {t.count}
                     </span>
                   </button>
@@ -297,20 +295,18 @@ const LeaderboardPage = () => {
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: visualIdx * 0.1 }}
                     onClick={() => handleSelectEntity(item)}
-                    className={`cursor-pointer group relative glass-card-static p-3 md:p-5 rounded-3xl text-center flex flex-col items-center justify-end transition-all hover:scale-[1.02] border ${
-                      isFirst 
-                        ? 'border-amber-500/50 shadow-xl bg-gradient-to-t from-amber-500/10 via-background to-background ring-2 ring-amber-500/30' 
+                    className={`cursor-pointer group relative glass-card-static p-3 md:p-5 rounded-3xl text-center flex flex-col items-center justify-end transition-all hover:scale-[1.02] border ${isFirst
+                        ? 'border-amber-500/50 shadow-xl bg-gradient-to-t from-amber-500/10 via-background to-background ring-2 ring-amber-500/30'
                         : 'border-border shadow-md'
-                    } ${isCurrentUser(item) ? 'ring-2 ring-primary' : ''}`}
+                      } ${isCurrentUser(item) ? 'ring-2 ring-primary' : ''}`}
                     style={{ minHeight: isFirst ? '230px' : '190px' }}
                   >
                     <span className="text-2xl md:text-4xl mb-1.5">{MEDAL[rank - 1]}</span>
 
-                    <div className={`w-12 h-12 md:w-14 md:h-14 rounded-2xl flex items-center justify-center text-white font-extrabold text-lg md:text-xl mb-2 shadow-lg ${
-                      rank === 1 ? 'bg-gradient-to-br from-amber-400 to-amber-600' :
-                      rank === 2 ? 'bg-gradient-to-br from-slate-400 to-slate-600' :
-                      'bg-gradient-to-br from-amber-700 to-amber-900'
-                    }`}>
+                    <div className={`w-12 h-12 md:w-14 md:h-14 rounded-2xl flex items-center justify-center text-white font-extrabold text-lg md:text-xl mb-2 shadow-lg ${rank === 1 ? 'bg-gradient-to-br from-amber-400 to-amber-600' :
+                        rank === 2 ? 'bg-gradient-to-br from-slate-400 to-slate-600' :
+                          'bg-gradient-to-br from-amber-700 to-amber-900'
+                      }`}>
                       {tab === 'societies' ? <Building2 className="w-6 h-6" /> : initial(item.name)}
                     </div>
 
@@ -343,7 +339,7 @@ const LeaderboardPage = () => {
 
           {/* ─── Main Leaderboard Rankings List ─── */}
           <div className="glass-card-static rounded-3xl border border-border overflow-hidden shadow-lg">
-            
+
             {/* Table Header / Subtitle */}
             <div className="px-5 py-4 border-b border-border bg-muted/30 flex items-center justify-between">
               <div className="flex items-center gap-2.5">
@@ -383,30 +379,27 @@ const LeaderboardPage = () => {
                       animate={{ opacity: 1, x: 0 }}
                       transition={{ delay: Math.min(index * 0.025, 0.3) }}
                       onClick={() => handleSelectEntity(item)}
-                      className={`flex items-center gap-3.5 md:gap-5 px-4 md:px-6 py-4 transition-all hover:bg-accent/40 cursor-pointer group ${
-                        isMe ? 'bg-primary/5 border-l-4 border-l-primary' : ''
-                      }`}
+                      className={`flex items-center gap-3.5 md:gap-5 px-4 md:px-6 py-4 transition-all hover:bg-accent/40 cursor-pointer group ${isMe ? 'bg-primary/5 border-l-4 border-l-primary' : ''
+                        }`}
                     >
                       {/* Rank Position */}
-                      <span className={`w-8 h-8 md:w-9 md:h-9 rounded-2xl flex-shrink-0 flex items-center justify-center text-xs md:text-sm font-extrabold ${
-                        rank <= 3
+                      <span className={`w-8 h-8 md:w-9 md:h-9 rounded-2xl flex-shrink-0 flex items-center justify-center text-xs md:text-sm font-extrabold ${rank <= 3
                           ? 'bg-gradient-to-br from-amber-500 to-primary text-white shadow-md'
                           : 'bg-muted text-muted-foreground'
-                      }`}>
+                        }`}>
                         {rank <= 3 ? MEDAL[rank - 1] : `#${rank}`}
                       </span>
 
                       {/* Avatar */}
-                      <div className={`w-10 h-10 md:w-11 md:h-11 rounded-2xl flex items-center justify-center font-extrabold text-sm md:text-base flex-shrink-0 shadow-sm ${
-                        tab === 'societies' ? 'bg-primary/15 text-primary' :
-                        tab === 'collectors' ? 'bg-blue-500/15 text-blue-600' :
-                        tab === 'identifiers' ? 'bg-purple-500/15 text-purple-600' :
-                        'bg-gradient-to-br from-primary/20 to-emerald-500/20 text-primary'
-                      }`}>
+                      <div className={`w-10 h-10 md:w-11 md:h-11 rounded-2xl flex items-center justify-center font-extrabold text-sm md:text-base flex-shrink-0 shadow-sm ${tab === 'societies' ? 'bg-primary/15 text-primary' :
+                          tab === 'collectors' ? 'bg-blue-500/15 text-blue-600' :
+                            tab === 'identifiers' ? 'bg-purple-500/15 text-purple-600' :
+                              'bg-gradient-to-br from-primary/20 to-emerald-500/20 text-primary'
+                        }`}>
                         {tab === 'societies' ? <Building2 className="w-5 h-5" /> :
-                         tab === 'collectors' ? <Truck className="w-5 h-5" /> :
-                         tab === 'identifiers' ? <ShieldCheck className="w-5 h-5" /> :
-                         initial(item.name)}
+                          tab === 'collectors' ? <Truck className="w-5 h-5" /> :
+                            tab === 'identifiers' ? <ShieldCheck className="w-5 h-5" /> :
+                              initial(item.name)}
                       </div>
 
                       {/* Entity Meta Info */}
@@ -415,7 +408,7 @@ const LeaderboardPage = () => {
                           <span className="font-bold text-sm md:text-base text-foreground group-hover:text-primary transition-colors truncate">
                             {item.name}
                           </span>
-                          
+
                           {isMe && (
                             <span className="text-[10px] px-2 py-0.5 bg-primary text-primary-foreground rounded-full font-extrabold">
                               YOU
@@ -473,7 +466,7 @@ const LeaderboardPage = () => {
                               <span>•</span>
                               <span>{item.collections || 0} routes</span>
                               <span>•</span>
-                              <span>{item.totalWasteKg?.toLocaleString() || 0} kg waste cleared</span>
+                              <span>{item.totalWasteKg?.toLocaleString() || 0}PSCs waste cleared</span>
                             </>
                           )}
 
@@ -625,7 +618,7 @@ const LeaderboardPage = () => {
 
               {/* Modal Body */}
               <div className="p-6 space-y-5 max-h-[70vh] overflow-y-auto">
-                
+
                 {/* Points & Level Bar */}
                 <div className="grid grid-cols-2 gap-3">
                   <div className="bg-slate-50 dark:bg-zinc-800/90 p-4 rounded-2xl border border-slate-200 dark:border-zinc-700">

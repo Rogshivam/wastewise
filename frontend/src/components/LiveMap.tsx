@@ -242,7 +242,7 @@ const LiveMap = ({ collectorMode = false, onMetricsUpdate }: LiveMapProps) => {
             <div class="p-2 font-sans min-w-[170px]">
               <h4 class="font-bold text-xs text-gray-900">🏠 ${stop.name}</h4>
               <p class="text-xs text-gray-600 mt-1">Est. Pickup: ${stop.estimatedTime || 5} mins</p>
-              <p class="text-xs text-emerald-600 font-semibold mt-0.5">Waste: ${stop.wasteAmountKg || 15} kg</p>
+              <p class="text-xs text-emerald-600 font-semibold mt-0.5">Waste: ${stop.wasteAmountKg || 15}PSCs</p>
             </div>
           `);
         stopMarkersRef.current[stop.id] = marker;
@@ -340,7 +340,7 @@ const LiveMap = ({ collectorMode = false, onMetricsUpdate }: LiveMapProps) => {
         lastMetricsUpdate = timestamp;
         const totalStopsCount = routePlan.orderedStops.length;
         const collectionStops = routePlan.orderedStops.filter(s => s.type === 'collection');
-        
+
         const activeIndex = Math.min(
           Math.floor(progress * (totalStopsCount - 1)),
           totalStopsCount - 1
@@ -450,11 +450,10 @@ const LiveMap = ({ collectorMode = false, onMetricsUpdate }: LiveMapProps) => {
           <button
             onClick={handleToggleDemo}
             disabled={isCalculatingRoute || !!routingError}
-            className={`flex items-center gap-1.5 text-xs font-semibold px-4 py-2 rounded-xl transition-all shadow-sm ${
-              isDemoActive
+            className={`flex items-center gap-1.5 text-xs font-semibold px-4 py-2 rounded-xl transition-all shadow-sm ${isDemoActive
                 ? 'bg-amber-500 hover:bg-amber-600 text-white animate-pulse'
                 : 'bg-emerald-600 hover:bg-emerald-700 text-white'
-            } disabled:opacity-50 disabled:cursor-not-allowed`}
+              } disabled:opacity-50 disabled:cursor-not-allowed`}
           >
             {isDemoActive ? <Pause className="w-3.5 h-3.5" /> : <Play className="w-3.5 h-3.5" />}
             {isDemoActive ? 'Pause Tracking' : 'Track the Collector'}
