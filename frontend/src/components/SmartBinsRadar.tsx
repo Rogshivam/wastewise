@@ -1,148 +1,101 @@
 import React, { useState } from 'react';
 import { 
   Radio, 
-  Battery, 
-  Thermometer, 
-  Wind, 
-  Truck, 
   MapPin, 
-  RefreshCw, 
-  Search, 
-  Filter, 
-  Layers
+  Thermometer, 
+  Battery, 
+  Wind, 
+  Clock, 
+  Truck, 
+  Search 
 } from 'lucide-react';
-import type { SmartBin, BinStatus } from '../types';
+import type { SmartBin } from '../types';
 
 interface SmartBinsRadarProps {
   bins: SmartBin[];
   onDispatchTruck: (binId: string) => void;
 }
 
-export const SmartBinsRadar: React.FC<SmartBinsRadarProps> = ({ bins, onDispatchTruck }) => {
+export const SmartBinsRadar: React.FC<SmartBinsRadarProps> = ({
+  bins,
+  onDispatchTruck
+}) => {
   const [selectedZone, setSelectedZone] = useState<string>('All');
   const [selectedType, setSelectedType] = useState<string>('All');
   const [searchQuery, setSearchQuery] = useState<string>('');
 
   const zones = ['All', 'Tech Park', 'Downtown Hub', 'Residential West', 'Harbor District', 'North District'];
-  const wasteTypes = ['All', 'Plastic & Cans', 'Paper & Cardboard', 'Organic Food', 'E-Waste', 'Mixed Municipal'];
+  const wasteTypes = ['All', 'Plastic', 'Paper', 'Organic', 'E-Waste'];
 
   const filteredBins = bins.filter(bin => {
     const matchesZone = selectedZone === 'All' || bin.zone === selectedZone;
-    const matchesType = selectedType === 'All' || bin.wasteType === selectedType;
+    const matchesType = selectedType === 'All' || bin.wasteType.toLowerCase().includes(selectedType.toLowerCase());
     const matchesSearch = bin.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
                           bin.location.toLowerCase().includes(searchQuery.toLowerCase());
     return matchesZone && matchesType && matchesSearch;
   });
 
-  const getStatusColor = (status: BinStatus, fillPercentage: number) => {
-    if (status === 'collecting') return '#38bdf8';
-    if (fillPercentage >= 85) return '#f43f5e';
-    if (fillPercentage >= 60) return '#f59e0b';
-    return '#10b981';
-  };
-
-  const getFillLevelBadge = (fill: number) => {
-    if (fill >= 85) return <span className="badge badge-rose">Critical {fill}%</span>;
-    if (fill >= 60) return <span className="badge badge-amber">Moderate {fill}%</span>;
-    return <span className="badge badge-emerald">Normal {fill}%</span>;
+  const getFillColor = (pct: number) => {
+    if (pct >= 85) return '#e11d48';
+    if (pct >= 65) return '#d97706';
+    return '#059669';
   };
 
   return (
     <div style={{ marginBottom: '3rem' }}>
-      {/* Section Header */}
+      {/* Header */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '1.5rem', flexWrap: 'wrap', gap: '1rem' }}>
         <div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: '#22d3ee', fontSize: '0.85rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-            <Radio size={16} className="animate-pulse-glow" />
-            <span>Smart City Mesh Telemetry</span>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: '#0d9488', fontSize: '0.85rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+            <Radio size={16} />
+            <span>Urban IoT Mesh Network</span>
           </div>
-          <h2 style={{ fontSize: '1.8rem', fontWeight: 800, color: '#ffffff', marginTop: '0.2rem' }}>
-            IoT Smart Bin Radar & Fleet Dispatch
+          <h2 style={{ fontSize: '1.8rem', fontWeight: 800, color: '#0f172a', marginTop: '0.2rem' }}>
+            Smart Bins Telemetry & Fleet Radar
           </h2>
-          <p style={{ color: '#94a3b8', fontSize: '0.95rem' }}>
-            Live LoRaWAN telemetry tracking ultrasonic volumetric levels, ambient temperature, and automated EV truck collection routes.
+          <p style={{ color: '#475569', fontSize: '0.95rem' }}>
+            Live sensor feeds monitoring ultrasonic volumetric capacity, ambient temperature, battery levels, and autonomous EV collection routes.
           </p>
         </div>
 
-        {/* Live Network Health Status */}
-        <div style={{
-          display: 'flex',
-          alignItems: 'center',
-          gap: '1rem',
-          background: 'rgba(15, 23, 42, 0.7)',
-          padding: '0.5rem 1rem',
-          borderRadius: '12px',
-          border: '1px solid rgba(255, 255, 255, 0.08)'
-        }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.8rem', color: '#34d399' }}>
-            <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#10b981', boxShadow: '0 0 8px #10b981' }} />
-            <span>6/6 Nodes Online</span>
-          </div>
-          <div style={{ height: '14px', width: '1px', background: 'rgba(255,255,255,0.1)' }} />
-          <div style={{ fontSize: '0.8rem', color: '#94a3b8' }}>
-            Mesh Latency: <strong style={{ color: '#f8fafc' }}>18ms</strong>
-          </div>
-        </div>
-      </div>
-
-      {/* Filter and Search Toolbar */}
-      <div className="glass-card" style={{
-        padding: '1rem 1.25rem',
-        marginBottom: '1.5rem',
-        display: 'flex',
-        flexWrap: 'wrap',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        gap: '1rem'
-      }}>
-        {/* Search input */}
-        <div style={{
-          display: 'flex',
-          alignItems: 'center',
-          gap: '0.6rem',
-          background: 'rgba(0, 0, 0, 0.3)',
-          border: '1px solid rgba(255, 255, 255, 0.1)',
-          borderRadius: '10px',
-          padding: '0.5rem 0.85rem',
-          minWidth: '260px'
-        }}>
-          <Search size={16} color="#94a3b8" />
-          <input 
+        {/* Search Input */}
+        <div style={{ position: 'relative', width: '280px' }}>
+          <Search size={16} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: '#94a3b8' }} />
+          <input
             type="text"
-            placeholder="Search bin name or street location..."
+            placeholder="Search bin by location or ID..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             style={{
-              background: 'transparent',
-              border: 'none',
-              outline: 'none',
-              color: '#f8fafc',
-              fontSize: '0.85rem',
-              width: '100%'
+              width: '100%',
+              padding: '0.6rem 0.8rem 0.6rem 2.4rem',
+              borderRadius: '10px',
+              border: '1px solid #cbd5e1',
+              background: '#ffffff',
+              color: '#0f172a',
+              fontSize: '0.85rem'
             }}
           />
         </div>
+      </div>
 
+      {/* Filter Bar */}
+      <div style={{ display: 'flex', gap: '1rem', marginBottom: '1.75rem', flexWrap: 'wrap', alignItems: 'center' }}>
         {/* Zone Filters */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap' }}>
-          <span style={{ fontSize: '0.8rem', color: '#64748b', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
-            <MapPin size={14} /> Zone:
-          </span>
-          {zones.map((zone) => (
+        <div style={{ display: 'flex', gap: '0.35rem', flexWrap: 'wrap' }}>
+          {zones.map(zone => (
             <button
               key={zone}
               onClick={() => setSelectedZone(zone)}
               style={{
-                padding: '0.35rem 0.75rem',
-                fontSize: '0.78rem',
+                padding: '0.4rem 0.85rem',
                 borderRadius: '8px',
-                border: 'none',
-                cursor: 'pointer',
-                background: selectedZone === zone ? 'rgba(6, 182, 212, 0.25)' : 'rgba(255, 255, 255, 0.04)',
-                color: selectedZone === zone ? '#22d3ee' : '#94a3b8',
-                borderBottom: selectedZone === zone ? '2px solid #06b6d4' : '2px solid transparent',
-                fontWeight: selectedZone === zone ? 600 : 500,
-                transition: 'all 0.2s'
+                border: selectedZone === zone ? '2px solid #059669' : '1px solid #cbd5e1',
+                background: selectedZone === zone ? '#dcfce7' : '#ffffff',
+                color: selectedZone === zone ? '#047857' : '#475569',
+                fontSize: '0.8rem',
+                fontWeight: selectedZone === zone ? 700 : 500,
+                cursor: 'pointer'
               }}
             >
               {zone}
@@ -150,168 +103,167 @@ export const SmartBinsRadar: React.FC<SmartBinsRadarProps> = ({ bins, onDispatch
           ))}
         </div>
 
-        {/* Waste Type Filters */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap' }}>
-          <span style={{ fontSize: '0.8rem', color: '#64748b', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
-            <Filter size={14} /> Type:
-          </span>
-          <select
-            value={selectedType}
-            onChange={(e) => setSelectedType(e.target.value)}
-            style={{
-              background: '#0f172a',
-              border: '1px solid rgba(255, 255, 255, 0.1)',
-              borderRadius: '8px',
-              padding: '0.35rem 0.75rem',
-              color: '#f8fafc',
-              fontSize: '0.8rem',
-              outline: 'none',
-              cursor: 'pointer'
-            }}
-          >
-            {wasteTypes.map(t => (
-              <option key={t} value={t}>{t}</option>
-            ))}
-          </select>
+        <div style={{ width: '1px', height: '24px', background: '#cbd5e1' }} />
+
+        {/* Type Filters */}
+        <div style={{ display: 'flex', gap: '0.35rem', flexWrap: 'wrap' }}>
+          {wasteTypes.map(type => (
+            <button
+              key={type}
+              onClick={() => setSelectedType(type)}
+              style={{
+                padding: '0.4rem 0.85rem',
+                borderRadius: '8px',
+                border: selectedType === type ? '2px solid #0d9488' : '1px solid #cbd5e1',
+                background: selectedType === type ? '#ccfbf1' : '#ffffff',
+                color: selectedType === type ? '#0f766e' : '#475569',
+                fontSize: '0.8rem',
+                fontWeight: selectedType === type ? 700 : 500,
+                cursor: 'pointer'
+              }}
+            >
+              {type}
+            </button>
+          ))}
         </div>
       </div>
 
-      {/* Smart Bins Grid */}
+      {/* Bins Grid */}
       <div className="grid-3">
         {filteredBins.map((bin) => {
           const isCritical = bin.fillPercentage >= 85;
           const isCollecting = bin.status === 'collecting';
-          const fillBarColor = getStatusColor(bin.status, bin.fillPercentage);
+          const fillColor = getFillColor(bin.fillPercentage);
 
           return (
-            <div 
-              key={bin.id} 
-              className="glass-card" 
+            <div
+              key={bin.id}
+              className="glass-card"
               style={{
                 padding: '1.5rem',
                 display: 'flex',
                 flexDirection: 'column',
                 justifyContent: 'space-between',
-                borderTop: `3px solid ${fillBarColor}`,
+                borderLeft: `4px solid ${fillColor}`,
                 position: 'relative'
               }}
             >
               <div>
-                {/* Card Top Row: Zone & Fill Level Badge */}
+                {/* Card Top: ID, Waste Type, Status Badge */}
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '0.75rem' }}>
-                  <span style={{ fontSize: '0.75rem', fontWeight: 600, color: '#94a3b8', display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
-                    <MapPin size={13} color="#06b6d4" />
-                    {bin.zone}
-                  </span>
-                  {getFillLevelBadge(bin.fillPercentage)}
-                </div>
-
-                {/* Bin Name & Waste Type */}
-                <h3 style={{ fontSize: '1.15rem', fontWeight: 700, color: '#ffffff', marginBottom: '0.25rem' }}>
-                  {bin.name}
-                </h3>
-                <p style={{ fontSize: '0.8rem', color: '#64748b', marginBottom: '1rem' }}>
-                  {bin.location}
-                </p>
-
-                {/* Waste Category Tag */}
-                <div style={{
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  gap: '0.35rem',
-                  padding: '0.25rem 0.6rem',
-                  borderRadius: '6px',
-                  background: 'rgba(255, 255, 255, 0.05)',
-                  fontSize: '0.75rem',
-                  fontWeight: 600,
-                  color: '#cbd5e1',
-                  marginBottom: '1.25rem'
-                }}>
-                  <Layers size={13} color="#10b981" />
-                  <span>{bin.wasteType}</span>
-                </div>
-
-                {/* Fill Level Visual Meter */}
-                <div style={{ marginBottom: '1.25rem' }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.78rem', marginBottom: '0.35rem' }}>
-                    <span style={{ color: '#94a3b8' }}>Fill Level Capacity</span>
-                    <span style={{ fontWeight: 700, color: fillBarColor }}>{bin.fillPercentage}%</span>
+                  <div>
+                    <span style={{ fontSize: '0.72rem', color: '#64748b', fontWeight: 700, textTransform: 'uppercase' }}>
+                      {bin.id} • {bin.wasteType}
+                    </span>
+                    <h3 style={{ fontSize: '1.15rem', fontWeight: 800, color: '#0f172a', marginTop: '0.1rem' }}>
+                      {bin.name}
+                    </h3>
                   </div>
+
+                  <span className={
+                    isCollecting ? "badge badge-teal" :
+                    isCritical ? "badge badge-rose" :
+                    bin.fillPercentage >= 65 ? "badge badge-amber" :
+                    "badge badge-emerald"
+                  }>
+                    {isCollecting ? "🚚 Truck En Route" : isCritical ? "⚠️ Critical (Empty Now)" : "● Normal"}
+                  </span>
+                </div>
+
+                {/* Location address */}
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', color: '#64748b', fontSize: '0.8rem', marginBottom: '1.25rem' }}>
+                  <MapPin size={14} color="#0d9488" />
+                  <span>{bin.location}</span>
+                </div>
+
+                {/* Fill Percentage Bar */}
+                <div style={{ marginBottom: '1.25rem' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '0.4rem' }}>
+                    <span style={{ fontSize: '0.75rem', fontWeight: 600, color: '#475569' }}>Ultrasonic Capacity</span>
+                    <span style={{ fontSize: '1.25rem', fontWeight: 900, color: fillColor }}>
+                      {bin.fillPercentage}%
+                    </span>
+                  </div>
+
                   <div style={{
                     width: '100%',
-                    height: '8px',
-                    background: 'rgba(255, 255, 255, 0.08)',
+                    height: '10px',
                     borderRadius: '999px',
+                    background: '#f1f5f9',
                     overflow: 'hidden'
                   }}>
                     <div style={{
                       width: `${bin.fillPercentage}%`,
                       height: '100%',
-                      background: fillBarColor,
-                      boxShadow: `0 0 10px ${fillBarColor}`,
-                      transition: 'width 0.8s cubic-bezier(0.4, 0, 0.2, 1)'
+                      background: fillColor,
+                      borderRadius: '999px',
+                      transition: 'width 0.8s ease-in-out'
                     }} />
                   </div>
                 </div>
 
-                {/* Telemetry Sensor Bar */}
+                {/* LoRaWAN Telemetry Metrics */}
                 <div style={{
                   display: 'grid',
                   gridTemplateColumns: 'repeat(3, 1fr)',
                   gap: '0.5rem',
-                  background: 'rgba(0, 0, 0, 0.3)',
-                  padding: '0.65rem',
+                  background: '#f8fafc',
+                  border: '1px solid #e2e8f0',
+                  padding: '0.75rem',
                   borderRadius: '10px',
-                  border: '1px solid rgba(255, 255, 255, 0.04)',
-                  fontSize: '0.75rem',
                   marginBottom: '1.25rem'
                 }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.3rem', color: '#94a3b8' }}>
-                    <Thermometer size={14} color="#06b6d4" />
-                    <span>{bin.temperatureCelsius}°C</span>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
+                    <Thermometer size={14} color="#0d9488" />
+                    <div>
+                      <div style={{ fontSize: '0.65rem', color: '#64748b' }}>Temp</div>
+                      <div style={{ fontSize: '0.8rem', fontWeight: 700, color: '#0f172a' }}>{bin.temperatureCelsius}°C</div>
+                    </div>
                   </div>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.3rem', color: '#10b981' }}>
-                    <Battery size={14} color="#10b981" />
-                    <span>{bin.batteryLevel}%</span>
+
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
+                    <Battery size={14} color="#059669" />
+                    <div>
+                      <div style={{ fontSize: '0.65rem', color: '#64748b' }}>Battery</div>
+                      <div style={{ fontSize: '0.8rem', fontWeight: 700, color: '#0f172a' }}>{bin.batteryLevel}%</div>
+                    </div>
                   </div>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.3rem', color: '#94a3b8' }}>
-                    <Wind size={14} color={bin.odorIndex === 'High' ? '#f43f5e' : '#34d399'} />
-                    <span>Odor: {bin.odorIndex}</span>
+
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
+                    <Wind size={14} color="#d97706" />
+                    <div>
+                      <div style={{ fontSize: '0.65rem', color: '#64748b' }}>Odor</div>
+                      <div style={{ fontSize: '0.8rem', fontWeight: 700, color: '#0f172a' }}>{bin.odorIndex}</div>
+                    </div>
                   </div>
                 </div>
               </div>
 
-              {/* Action Buttons: Dispatch Collection Truck */}
-              <div style={{ display: 'flex', gap: '0.5rem' }}>
+              {/* Bottom Actions */}
+              <div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '0.75rem', color: '#64748b', marginBottom: '0.75rem' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
+                    <Clock size={12} />
+                    <span>Emptied: {bin.lastEmptied}</span>
+                  </div>
+                </div>
+
                 <button
                   onClick={() => onDispatchTruck(bin.id)}
-                  disabled={isCollecting || bin.fillPercentage < 20}
-                  className="btn-primary"
+                  disabled={isCollecting}
+                  className={isCollecting ? "btn-secondary" : isCritical ? "btn-primary" : "btn-secondary"}
                   style={{
-                    flex: 1,
-                    padding: '0.55rem 0.85rem',
-                    fontSize: '0.8rem',
-                    borderRadius: '8px',
-                    background: isCollecting 
-                      ? 'rgba(6, 182, 212, 0.2)' 
-                      : isCritical 
-                      ? 'linear-gradient(135deg, #f43f5e 0%, #e11d48 100%)' 
-                      : 'linear-gradient(135deg, #10b981 0%, #06b6d4 100%)',
-                    color: '#ffffff',
-                    boxShadow: isCritical ? '0 4px 15px rgba(244, 63, 94, 0.35)' : undefined
+                    width: '100%',
+                    padding: '0.6rem',
+                    borderRadius: '10px',
+                    fontSize: '0.82rem',
+                    background: isCritical && !isCollecting ? 'linear-gradient(135deg, #e11d48, #be123c)' : undefined,
+                    color: isCritical && !isCollecting ? '#ffffff' : undefined,
+                    cursor: isCollecting ? 'default' : 'pointer'
                   }}
                 >
-                  {isCollecting ? (
-                    <>
-                      <RefreshCw size={14} style={{ animation: 'spin 1s linear infinite' }} />
-                      <span>Truck En Route...</span>
-                    </>
-                  ) : (
-                    <>
-                      <Truck size={14} />
-                      <span>{isCritical ? 'Dispatch Urgently' : 'Dispatch Emptying'}</span>
-                    </>
-                  )}
+                  <Truck size={16} />
+                  <span>{isCollecting ? "EV Truck Dispatched..." : isCritical ? "Dispatch Urgent EV Collector" : "Schedule Route Pickup"}</span>
                 </button>
               </div>
             </div>

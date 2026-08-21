@@ -1,65 +1,67 @@
 import React, { useState } from 'react';
 import { 
-  Truck, 
   Calendar, 
   Clock, 
   MapPin, 
+  Truck, 
+  Weight, 
   Coins, 
-  Package, 
-  User, 
-  PlusCircle
+  Sparkles, 
+  Plus 
 } from 'lucide-react';
 import confetti from 'canvas-confetti';
-import type { PickupRequest, PickupStatus } from '../types';
+import type { PickupRequest } from '../types';
 
 interface PickupSchedulerProps {
   pickups: PickupRequest[];
-  onBookPickup: (newPickup: PickupRequest) => void;
+  onBookPickup: (pickup: PickupRequest) => void;
 }
 
-export const PickupScheduler: React.FC<PickupSchedulerProps> = ({ pickups, onBookPickup }) => {
-  const [showBookingModal, setShowBookingModal] = useState(false);
-  const [category, setCategory] = useState('Electronics & Appliances');
-  const [date, setDate] = useState('2026-08-25');
-  const [timeSlot, setTimeSlot] = useState('10:00 AM - 12:00 PM');
-  const [weightKg, setWeightKg] = useState<number>(15);
-  const [address, setAddress] = useState('742 Evergreen Terrace, Apt 4B');
-  const [specialNotes, setSpecialNotes] = useState('');
+export const PickupScheduler: React.FC<PickupSchedulerProps> = ({
+  pickups,
+  onBookPickup
+}) => {
+  const [showModal, setShowModal] = useState<boolean>(false);
+  const [wasteType, setWasteType] = useState<string>('E-Waste & Small Appliances');
+  const [estimatedWeightKg, setEstimatedWeightKg] = useState<number>(15);
+  const [pickupDate, setPickupDate] = useState<string>('2026-08-23');
+  const [timeSlot, setTimeSlot] = useState<string>('10:00 AM - 01:00 PM');
+  const [address, setAddress] = useState<string>('Flat 402, Green Valley Enclave, Sector 9');
 
-  const calculatedPoints = Math.round(weightKg * 10.5);
+  const estimatedPoints = estimatedWeightKg * 15;
 
-  const handleSubmitBooking = (e: React.FormEvent) => {
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    const newRequest: PickupRequest = {
-      id: `REQ-${Math.floor(1000 + Math.random() * 9000)}`,
-      category,
-      date,
+    const newPickup: PickupRequest = {
+      id: `PU-${Math.floor(1000 + Math.random() * 9000)}`,
+      category: wasteType,
+      estimatedWeightKg,
+      date: pickupDate,
       timeSlot,
-      estimatedWeightKg: Number(weightKg),
-      address,
-      specialNotes,
       status: 'Scheduled',
-      driverName: 'Liam O\'Connor',
-      driverPhone: '+1 (555) 749-0192',
-      ecoPointsEarned: calculatedPoints,
+      address,
+      ecoPointsEarned: estimatedPoints,
       createdAt: 'Just now'
     };
 
-    onBookPickup(newRequest);
-    setShowBookingModal(false);
+    onBookPickup(newPickup);
+    setShowModal(false);
     confetti({
       particleCount: 60,
-      spread: 60,
-      origin: { y: 0.6 }
+      spread: 60
     });
   };
 
-  const getStatusBadge = (status: PickupStatus) => {
+  const getStatusBadge = (status: PickupRequest['status']) => {
     switch (status) {
-      case 'Collected': return <span className="badge badge-emerald">✓ Collected & Recycled</span>;
-      case 'En Route': return <span className="badge badge-cyan">🚚 Driver En Route</span>;
-      case 'Driver Assigned': return <span className="badge badge-violet">👤 Driver Assigned</span>;
-      default: return <span className="badge badge-amber">⏳ Scheduled</span>;
+      case 'Scheduled':
+        return <span className="badge badge-amber">🕒 Scheduled</span>;
+      case 'Driver Assigned':
+        return <span className="badge badge-purple">🚚 Driver Assigned</span>;
+      case 'En Route':
+        return <span className="badge badge-teal">⚡ En Route</span>;
+      case 'Collected':
+        return <span className="badge badge-emerald">✓ Collected</span>;
     }
   };
 
@@ -68,34 +70,116 @@ export const PickupScheduler: React.FC<PickupSchedulerProps> = ({ pickups, onBoo
       {/* Header */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '1.5rem', flexWrap: 'wrap', gap: '1rem' }}>
         <div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: '#10b981', fontSize: '0.85rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: '#059669', fontSize: '0.85rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
             <Truck size={16} />
             <span>Zero-Emission Doorstep Logistics</span>
           </div>
-          <h2 style={{ fontSize: '1.8rem', fontWeight: 800, color: '#ffffff', marginTop: '0.2rem' }}>
-            Smart Pickup & Bulk Waste Booking
+          <h2 style={{ fontSize: '1.8rem', fontWeight: 800, color: '#0f172a', marginTop: '0.2rem' }}>
+            Doorstep Collection & E-Waste Pickup
           </h2>
-          <p style={{ color: '#94a3b8', fontSize: '0.95rem' }}>
-            Schedule on-demand doorstep collection for electronics, bulky cardboard, compost, or hazardous materials.
+          <p style={{ color: '#475569', fontSize: '0.95rem' }}>
+            Book scheduled doorstep collection for bulky household recyclables, outdated electronics, or yard organics and earn verified Eco-Credits.
           </p>
         </div>
 
-        <button 
-          onClick={() => setShowBookingModal(true)}
-          className="btn-primary"
-          style={{ padding: '0.75rem 1.4rem' }}
+        <button
+          onClick={() => setShowModal(true)}
+          className="btn-eco"
+          style={{ padding: '0.65rem 1.35rem', borderRadius: '12px' }}
         >
-          <PlusCircle size={18} />
-          <span>Book Doorstep Pickup</span>
+          <Plus size={18} />
+          <span>Book New Doorstep Pickup</span>
         </button>
       </div>
 
-      {/* Booking Modal / Embedded Form */}
-      {showBookingModal && (
+      {/* Active Pickups List */}
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+        {pickups.map((pickup) => (
+          <div
+            key={pickup.id}
+            className="glass-card"
+            style={{
+              padding: '1.5rem',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              gap: '1.5rem',
+              flexWrap: 'wrap'
+            }}
+          >
+            {/* Left: Type, ID, Address */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: '1.25rem' }}>
+              <div style={{
+                width: '48px',
+                height: '48px',
+                borderRadius: '12px',
+                background: '#dcfce7',
+                border: '1px solid #bbf7d0',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                color: '#047857',
+                flexShrink: 0
+              }}>
+                <Truck size={24} />
+              </div>
+
+              <div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.2rem' }}>
+                  <span style={{ fontSize: '0.75rem', fontWeight: 700, color: '#047857', background: '#dcfce7', padding: '0.1rem 0.45rem', borderRadius: '6px' }}>
+                    {pickup.id}
+                  </span>
+                  <span style={{ fontSize: '1.1rem', fontWeight: 800, color: '#0f172a' }}>
+                    {pickup.category}
+                  </span>
+                </div>
+
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', color: '#64748b', fontSize: '0.82rem' }}>
+                  <MapPin size={14} color="#059669" />
+                  <span>{pickup.address}</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Middle: Date, Time Slot, Weight */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: '2rem' }}>
+              <div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', fontSize: '0.82rem', color: '#0f172a', fontWeight: 600 }}>
+                  <Calendar size={14} color="#059669" />
+                  <span>{pickup.date}</span>
+                </div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', fontSize: '0.75rem', color: '#64748b', marginTop: '0.15rem' }}>
+                  <Clock size={12} />
+                  <span>{pickup.timeSlot}</span>
+                </div>
+              </div>
+
+              <div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', fontSize: '0.82rem', color: '#0f172a', fontWeight: 600 }}>
+                  <Weight size={14} color="#0d9488" />
+                  <span>~{pickup.estimatedWeightKg} kg load</span>
+                </div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', fontSize: '0.75rem', color: '#d97706', fontWeight: 700, marginTop: '0.15rem' }}>
+                  <Coins size={12} />
+                  <span>+{pickup.ecoPointsEarned} PTS</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Right: Status & Actions */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+              {getStatusBadge(pickup.status)}
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {/* Booking Modal */}
+      {showModal && (
         <div style={{
           position: 'fixed',
           inset: 0,
-          background: 'rgba(0, 0, 0, 0.8)',
+          background: 'rgba(15, 23, 42, 0.6)',
           backdropFilter: 'blur(8px)',
           zIndex: 100,
           display: 'flex',
@@ -104,298 +188,123 @@ export const PickupScheduler: React.FC<PickupSchedulerProps> = ({ pickups, onBoo
           padding: '1.5rem'
         }}>
           <div className="glass-card" style={{
-            maxWidth: '600px',
+            maxWidth: '540px',
             width: '100%',
             padding: '2rem',
-            background: 'rgba(15, 23, 42, 0.95)',
-            border: '1px solid rgba(16, 185, 129, 0.3)',
-            maxHeight: '90vh',
-            overflowY: 'auto'
+            background: '#ffffff',
+            border: '1px solid #cbd5e1',
+            borderRadius: '20px',
+            boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)'
           }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
-              <div>
-                <h3 style={{ fontSize: '1.4rem', fontWeight: 800, color: '#f8fafc' }}>Schedule Eco-Pickup</h3>
-                <p style={{ fontSize: '0.8rem', color: '#94a3b8' }}>Electric van dispatch straight to your doorstep</p>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                <Truck size={20} color="#059669" />
+                <h3 style={{ fontSize: '1.3rem', fontWeight: 800, color: '#0f172a' }}>Schedule EV Doorstep Pickup</h3>
               </div>
-              <button 
-                onClick={() => setShowBookingModal(false)}
-                style={{ background: 'transparent', border: 'none', color: '#94a3b8', fontSize: '1.2rem', cursor: 'pointer' }}
+              <button
+                onClick={() => setShowModal(false)}
+                style={{ background: 'transparent', border: 'none', color: '#64748b', fontSize: '1.2rem', cursor: 'pointer' }}
               >
                 ✕
               </button>
             </div>
 
-            <form onSubmit={handleSubmitBooking} style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
+            <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
               {/* Category */}
               <div>
-                <label style={{ fontSize: '0.85rem', fontWeight: 600, color: '#cbd5e1', display: 'block', marginBottom: '0.4rem' }}>
-                  Waste Category
+                <label style={{ fontSize: '0.82rem', fontWeight: 600, color: '#334155', display: 'block', marginBottom: '0.4rem' }}>
+                  Waste Stream
                 </label>
                 <select
-                  value={category}
-                  onChange={(e) => setCategory(e.target.value)}
-                  style={{
-                    width: '100%',
-                    padding: '0.65rem 0.85rem',
-                    borderRadius: '8px',
-                    background: '#0f172a',
-                    border: '1px solid rgba(255, 255, 255, 0.15)',
-                    color: '#f8fafc',
-                    outline: 'none'
-                  }}
+                  value={wasteType}
+                  onChange={(e) => setWasteType(e.target.value)}
+                  style={{ width: '100%', padding: '0.65rem', borderRadius: '10px', background: '#ffffff', border: '1px solid #cbd5e1', color: '#0f172a', fontSize: '0.85rem' }}
                 >
-                  <option value="Electronics & Appliances">Electronics & E-Waste Appliances</option>
-                  <option value="Bulk Cardboard & Packaging">Bulk Corrugated Cardboard & Moving Boxes</option>
-                  <option value="Organic Biomass & Yard Waste">Organic Green Waste & Lawn Trimmings</option>
-                  <option value="Hazardous Paint & Chemicals">Hazardous Paints, Solvents & Batteries</option>
+                  <option value="E-Waste & Small Appliances">Electronics & Small Appliances (E-Waste)</option>
+                  <option value="Discarded Wood & Bulk Furniture">Discarded Wood & Bulk Furniture</option>
+                  <option value="Organic Yard & Garden Trims">Garden Trim & Green Waste</option>
+                  <option value="Clean Rigid Plastics & PET Bales">Clean Rigid Plastics & PET Bales</option>
                 </select>
-              </div>
-
-              {/* Date & Time Slot */}
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
-                <div>
-                  <label style={{ fontSize: '0.85rem', fontWeight: 600, color: '#cbd5e1', display: 'block', marginBottom: '0.4rem' }}>
-                    Pickup Date
-                  </label>
-                  <input 
-                    type="date"
-                    value={date}
-                    onChange={(e) => setDate(e.target.value)}
-                    style={{
-                      width: '100%',
-                      padding: '0.65rem 0.85rem',
-                      borderRadius: '8px',
-                      background: '#0f172a',
-                      border: '1px solid rgba(255, 255, 255, 0.15)',
-                      color: '#f8fafc',
-                      outline: 'none'
-                    }}
-                    required
-                  />
-                </div>
-                <div>
-                  <label style={{ fontSize: '0.85rem', fontWeight: 600, color: '#cbd5e1', display: 'block', marginBottom: '0.4rem' }}>
-                    Time Window
-                  </label>
-                  <select
-                    value={timeSlot}
-                    onChange={(e) => setTimeSlot(e.target.value)}
-                    style={{
-                      width: '100%',
-                      padding: '0.65rem 0.85rem',
-                      borderRadius: '8px',
-                      background: '#0f172a',
-                      border: '1px solid rgba(255, 255, 255, 0.15)',
-                      color: '#f8fafc',
-                      outline: 'none'
-                    }}
-                  >
-                    <option value="09:00 AM - 11:00 AM">09:00 AM - 11:00 AM</option>
-                    <option value="11:00 AM - 01:00 PM">11:00 AM - 01:00 PM</option>
-                    <option value="02:00 PM - 04:00 PM">02:00 PM - 04:00 PM</option>
-                    <option value="04:00 PM - 06:00 PM">04:00 PM - 06:00 PM</option>
-                  </select>
-                </div>
               </div>
 
               {/* Weight Slider */}
               <div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.4rem' }}>
-                  <label style={{ fontSize: '0.85rem', fontWeight: 600, color: '#cbd5e1' }}>
-                    Estimated Weight (kg)
-                  </label>
-                  <span style={{ fontSize: '0.9rem', fontWeight: 700, color: '#34d399' }}>{weightKg} kg</span>
+                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.82rem', marginBottom: '0.3rem' }}>
+                  <span style={{ fontWeight: 600, color: '#334155' }}>Estimated Weight</span>
+                  <span style={{ color: '#059669', fontWeight: 700 }}>{estimatedWeightKg} kg</span>
                 </div>
-                <input 
-                  type="range" 
-                  min="2" 
-                  max="100" 
-                  value={weightKg} 
-                  onChange={(e) => setWeightKg(Number(e.target.value))}
-                  style={{ width: '100%', accentColor: '#10b981', cursor: 'pointer' }}
+                <input
+                  type="range"
+                  min="2"
+                  max="100"
+                  value={estimatedWeightKg}
+                  onChange={(e) => setEstimatedWeightKg(parseInt(e.target.value, 10))}
+                  style={{ width: '100%', accentColor: '#059669' }}
                 />
+              </div>
+
+              {/* Date & Time Slot Grid */}
+              <div className="grid-2">
+                <div>
+                  <label style={{ fontSize: '0.82rem', fontWeight: 600, color: '#334155', display: 'block', marginBottom: '0.4rem' }}>
+                    Preferred Date
+                  </label>
+                  <input
+                    type="date"
+                    value={pickupDate}
+                    onChange={(e) => setPickupDate(e.target.value)}
+                    style={{ width: '100%', padding: '0.65rem', borderRadius: '10px', background: '#ffffff', border: '1px solid #cbd5e1', color: '#0f172a', fontSize: '0.85rem' }}
+                    required
+                  />
+                </div>
+
+                <div>
+                  <label style={{ fontSize: '0.82rem', fontWeight: 600, color: '#334155', display: 'block', marginBottom: '0.4rem' }}>
+                    Time Slot
+                  </label>
+                  <select
+                    value={timeSlot}
+                    onChange={(e) => setTimeSlot(e.target.value)}
+                    style={{ width: '100%', padding: '0.65rem', borderRadius: '10px', background: '#ffffff', border: '1px solid #cbd5e1', color: '#0f172a', fontSize: '0.85rem' }}
+                  >
+                    <option value="08:00 AM - 11:00 AM">08:00 AM - 11:00 AM</option>
+                    <option value="10:00 AM - 01:00 PM">10:00 AM - 01:00 PM</option>
+                    <option value="02:00 PM - 05:00 PM">02:00 PM - 05:00 PM</option>
+                    <option value="05:00 PM - 08:00 PM">05:00 PM - 08:00 PM</option>
+                  </select>
+                </div>
               </div>
 
               {/* Address */}
               <div>
-                <label style={{ fontSize: '0.85rem', fontWeight: 600, color: '#cbd5e1', display: 'block', marginBottom: '0.4rem' }}>
-                  Pickup Address
+                <label style={{ fontSize: '0.82rem', fontWeight: 600, color: '#334155', display: 'block', marginBottom: '0.4rem' }}>
+                  Doorstep Pickup Address
                 </label>
-                <input 
+                <input
                   type="text"
                   value={address}
                   onChange={(e) => setAddress(e.target.value)}
-                  style={{
-                    width: '100%',
-                    padding: '0.65rem 0.85rem',
-                    borderRadius: '8px',
-                    background: '#0f172a',
-                    border: '1px solid rgba(255, 255, 255, 0.15)',
-                    color: '#f8fafc',
-                    outline: 'none'
-                  }}
+                  style={{ width: '100%', padding: '0.65rem', borderRadius: '10px', background: '#ffffff', border: '1px solid #cbd5e1', color: '#0f172a', fontSize: '0.85rem' }}
                   required
                 />
               </div>
 
-              {/* Notes */}
-              <div>
-                <label style={{ fontSize: '0.85rem', fontWeight: 600, color: '#cbd5e1', display: 'block', marginBottom: '0.4rem' }}>
-                  Special Instructions (Optional)
-                </label>
-                <input 
-                  type="text"
-                  placeholder="e.g. Ring Apt 4B doorbell, left beside garage gate"
-                  value={specialNotes}
-                  onChange={(e) => setSpecialNotes(e.target.value)}
-                  style={{
-                    width: '100%',
-                    padding: '0.65rem 0.85rem',
-                    borderRadius: '8px',
-                    background: '#0f172a',
-                    border: '1px solid rgba(255, 255, 255, 0.15)',
-                    color: '#f8fafc',
-                    outline: 'none'
-                  }}
-                />
+              {/* Reward Projection */}
+              <div style={{ background: '#fefce8', border: '1px solid #fef08a', padding: '0.85rem', borderRadius: '10px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <span style={{ fontSize: '0.82rem', color: '#854d0e', fontWeight: 600 }}>Estimated Reward Credits:</span>
+                <span style={{ fontSize: '1.1rem', fontWeight: 800, color: '#b45309', display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
+                  <Coins size={16} /> +{estimatedPoints} PTS
+                </span>
               </div>
 
-              {/* Estimated Reward Preview */}
-              <div style={{
-                background: 'rgba(245, 158, 11, 0.1)',
-                border: '1px solid rgba(245, 158, 11, 0.25)',
-                padding: '0.75rem 1rem',
-                borderRadius: '8px',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'space-between'
-              }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: '#fbbf24', fontSize: '0.85rem', fontWeight: 600 }}>
-                  <Coins size={16} />
-                  <span>Estimated Reward Credits</span>
-                </div>
-                <div style={{ fontSize: '1.1rem', fontWeight: 800, color: '#fef08a' }}>
-                  +{calculatedPoints} PTS
-                </div>
-              </div>
-
-              {/* Actions */}
-              <div style={{ display: 'flex', gap: '0.75rem', marginTop: '0.5rem' }}>
-                <button 
-                  type="button" 
-                  onClick={() => setShowBookingModal(false)}
-                  className="btn-secondary"
-                  style={{ flex: 1 }}
-                >
-                  Cancel
-                </button>
-                <button 
-                  type="submit" 
-                  className="btn-primary"
-                  style={{ flex: 1 }}
-                >
-                  Confirm & Dispatch
-                </button>
-              </div>
+              <button type="submit" className="btn-eco" style={{ padding: '0.8rem', borderRadius: '12px', marginTop: '0.5rem' }}>
+                <Sparkles size={18} />
+                <span>Confirm EV Collection Booking</span>
+              </button>
             </form>
           </div>
         </div>
       )}
-
-      {/* Pickups Timeline List */}
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
-        {pickups.map((pickup) => (
-          <div 
-            key={pickup.id}
-            className="glass-card"
-            style={{
-              padding: '1.5rem',
-              display: 'grid',
-              gridTemplateColumns: '1.2fr 1fr 1fr',
-              gap: '1.5rem',
-              alignItems: 'center'
-            }}
-          >
-            {/* Left: Request Info */}
-            <div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', marginBottom: '0.4rem' }}>
-                <span style={{ fontSize: '0.75rem', fontWeight: 700, color: '#10b981', background: 'rgba(16, 185, 129, 0.15)', padding: '0.2rem 0.5rem', borderRadius: '4px' }}>
-                  {pickup.id}
-                </span>
-                {getStatusBadge(pickup.status)}
-              </div>
-              <h3 style={{ fontSize: '1.15rem', fontWeight: 700, color: '#ffffff', marginBottom: '0.35rem' }}>
-                {pickup.category}
-              </h3>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', color: '#94a3b8', fontSize: '0.8rem' }}>
-                <MapPin size={13} color="#06b6d4" />
-                <span>{pickup.address}</span>
-              </div>
-              {pickup.specialNotes && (
-                <p style={{ fontSize: '0.75rem', color: '#64748b', marginTop: '0.35rem', fontStyle: 'italic' }}>
-                  "{pickup.specialNotes}"
-                </p>
-              )}
-            </div>
-
-            {/* Middle: Date, Time & Driver info */}
-            <div style={{
-              background: 'rgba(0, 0, 0, 0.25)',
-              padding: '0.9rem',
-              borderRadius: '10px',
-              border: '1px solid rgba(255, 255, 255, 0.05)',
-              display: 'flex',
-              flexDirection: 'column',
-              gap: '0.4rem',
-              fontSize: '0.8rem'
-            }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', color: '#cbd5e1' }}>
-                <Calendar size={14} color="#10b981" />
-                <span>{pickup.date}</span>
-              </div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', color: '#cbd5e1' }}>
-                <Clock size={14} color="#06b6d4" />
-                <span>{pickup.timeSlot}</span>
-              </div>
-              {pickup.driverName && (
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', color: '#94a3b8', marginTop: '0.2rem', paddingTop: '0.4rem', borderTop: '1px solid rgba(255,255,255,0.06)' }}>
-                  <User size={14} color="#fbbf24" />
-                  <span>Driver: <strong style={{ color: '#f8fafc' }}>{pickup.driverName}</strong></span>
-                </div>
-              )}
-            </div>
-
-            {/* Right: Weight & Eco Points */}
-            <div style={{
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'flex-end',
-              justifyContent: 'center',
-              gap: '0.4rem'
-            }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', color: '#94a3b8', fontSize: '0.85rem' }}>
-                <Package size={15} />
-                <span>Est. Weight: <strong style={{ color: '#f8fafc' }}>{pickup.estimatedWeightKg} kg</strong></span>
-              </div>
-              <div style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '0.4rem',
-                padding: '0.35rem 0.75rem',
-                borderRadius: '999px',
-                background: 'rgba(245, 158, 11, 0.15)',
-                border: '1px solid rgba(245, 158, 11, 0.3)',
-                color: '#fbbf24',
-                fontWeight: 700,
-                fontSize: '0.9rem'
-              }}>
-                <Coins size={16} />
-                <span>+{pickup.ecoPointsEarned} PTS Credited</span>
-              </div>
-            </div>
-          </div>
-        ))}
-      </div>
     </div>
   );
 };

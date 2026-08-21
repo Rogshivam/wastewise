@@ -2,15 +2,11 @@ import React, { useState } from 'react';
 import { 
   Gift, 
   Coins, 
-  ShoppingBag, 
-  Trees, 
-  Coffee, 
-  Train, 
-  Sun, 
-  Check, 
-  Copy, 
+  CheckCircle2, 
+  Lock, 
   Sparkles, 
-  Flame
+  Copy, 
+  Check 
 } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import type { EcoReward } from '../types';
@@ -27,10 +23,10 @@ export const EcoRewards: React.FC<EcoRewardsProps> = ({
   onRedeemReward
 }) => {
   const [selectedCategory, setSelectedCategory] = useState<string>('All');
-  const [activeVoucherModal, setActiveVoucherModal] = useState<EcoReward | null>(null);
-  const [copiedCode, setCopiedCode] = useState(false);
+  const [activeVoucher, setActiveVoucher] = useState<{ reward: EcoReward; code: string } | null>(null);
+  const [copiedCode, setCopiedCode] = useState<boolean>(false);
 
-  const categories = ['All', 'Vouchers', 'Tree Planting', 'Eco Products', 'Clean Energy'];
+  const categories = ['All', 'Vouchers', 'Eco Products', 'Tree Planting', 'Clean Energy'];
 
   const filteredRewards = rewards.filter(r => 
     selectedCategory === 'All' || r.category === selectedCategory
@@ -39,129 +35,77 @@ export const EcoRewards: React.FC<EcoRewardsProps> = ({
   const handleRedeem = (reward: EcoReward) => {
     const success = onRedeemReward(reward);
     if (success) {
-      setActiveVoucherModal(reward);
+      const generatedCode = `ECO-${Math.random().toString(36).substring(2, 8).toUpperCase()}`;
+      setActiveVoucher({ reward, code: generatedCode });
       confetti({
         particleCount: 100,
         spread: 80,
-        origin: { y: 0.6 },
-        colors: ['#fbbf24', '#f59e0b', '#10b981', '#06b6d4', '#8b5cf6']
+        origin: { y: 0.6 }
       });
     }
   };
 
-  const handleCopyCode = (code: string) => {
-    navigator.clipboard.writeText(code);
-    setCopiedCode(true);
-    setTimeout(() => setCopiedCode(false), 2000);
-  };
-
-  const getRewardIcon = (iconName: string) => {
-    switch (iconName) {
-      case 'ShoppingBag': return <ShoppingBag size={22} color="#10b981" />;
-      case 'Trees': return <Trees size={22} color="#34d399" />;
-      case 'Coffee': return <Coffee size={22} color="#fbbf24" />;
-      case 'Train': return <Train size={22} color="#06b6d4" />;
-      case 'Sun': return <Sun size={22} color="#f59e0b" />;
-      default: return <Gift size={22} color="#8b5cf6" />;
+  const handleCopyCode = () => {
+    if (activeVoucher) {
+      navigator.clipboard.writeText(activeVoucher.code);
+      setCopiedCode(true);
+      setTimeout(() => setCopiedCode(false), 2000);
     }
   };
 
   return (
     <div style={{ marginBottom: '3rem' }}>
-      {/* Header & Balance Banner */}
-      <div style={{
-        display: 'grid',
-        gridTemplateColumns: '1.2fr 1fr',
-        gap: '2rem',
-        alignItems: 'center',
-        marginBottom: '2rem'
-      }}>
+      {/* Header with points balance hero */}
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '2rem', flexWrap: 'wrap', gap: '1.5rem' }}>
         <div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: '#fbbf24', fontSize: '0.85rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: '#d97706', fontSize: '0.85rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
             <Gift size={16} />
-            <span>Circularity Gamification</span>
+            <span>Circularity Points Marketplace</span>
           </div>
-          <h2 style={{ fontSize: '1.8rem', fontWeight: 800, color: '#ffffff', marginTop: '0.2rem' }}>
-            Eco-Rewards & Carbon-Negative Marketplace
+          <h2 style={{ fontSize: '1.8rem', fontWeight: 800, color: '#0f172a', marginTop: '0.2rem' }}>
+            Eco-Rewards & Zero-Waste Store
           </h2>
-          <p style={{ color: '#94a3b8', fontSize: '0.95rem' }}>
-            Convert the points you earned from waste sorting and cleanups into zero-waste grocery vouchers, transit passes, or certified mangrove trees.
+          <p style={{ color: '#475569', fontSize: '0.95rem' }}>
+            Redeem your earned recycling credits for organic groceries, tree planting sponsorships, electric transit passes, and sustainable gear.
           </p>
         </div>
 
-        {/* User Balance Card */}
+        {/* Big Balance Banner */}
         <div className="glass-card" style={{
-          padding: '1.5rem',
-          background: 'linear-gradient(135deg, rgba(245, 158, 11, 0.15) 0%, rgba(16, 185, 129, 0.15) 100%)',
-          border: '1px solid rgba(245, 158, 11, 0.35)'
+          padding: '1.25rem 2rem',
+          display: 'flex',
+          alignItems: 'center',
+          gap: '1.25rem',
+          background: 'linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%)',
+          border: '1px solid #fde68a'
         }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '0.75rem' }}>
-            <span style={{ fontSize: '0.8rem', color: '#fef08a', fontWeight: 600 }}>Your Available Eco-Balance</span>
-            <div style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '0.3rem',
-              padding: '0.2rem 0.5rem',
-              borderRadius: '999px',
-              background: 'rgba(245, 158, 11, 0.25)',
-              fontSize: '0.75rem',
-              color: '#fef08a',
-              fontWeight: 700
-            }}>
-              <Flame size={13} color="#f59e0b" /> Tier 2 Silver
-            </div>
+          <div style={{ padding: '0.6rem', borderRadius: '50%', background: '#f59e0b', color: '#ffffff' }}>
+            <Coins size={28} />
           </div>
-
-          <div style={{ display: 'flex', alignItems: 'baseline', gap: '0.5rem', marginBottom: '0.75rem' }}>
-            <Coins size={28} color="#fbbf24" />
-            <span style={{ fontSize: '2.2rem', fontWeight: 900, color: '#ffffff', letterSpacing: '-0.03em' }}>
-              {ecoPoints.toLocaleString()}
-            </span>
-            <span style={{ fontSize: '1rem', color: '#fef08a', fontWeight: 700 }}>PTS</span>
-          </div>
-
-          {/* Level Progress */}
           <div>
-            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.72rem', color: '#94a3b8', marginBottom: '0.3rem' }}>
-              <span>Progress to Gold Tier (3,000 PTS)</span>
-              <span>{Math.min(100, Math.round((ecoPoints / 3000) * 100))}%</span>
-            </div>
-            <div style={{ width: '100%', height: '6px', background: 'rgba(0,0,0,0.4)', borderRadius: '999px', overflow: 'hidden' }}>
-              <div style={{
-                width: `${Math.min(100, (ecoPoints / 3000) * 100)}%`,
-                height: '100%',
-                background: 'linear-gradient(90deg, #fbbf24, #10b981)',
-                boxShadow: '0 0 10px #fbbf24'
-              }} />
+            <div style={{ fontSize: '0.8rem', color: '#92400e', fontWeight: 600 }}>Your Available Eco-Balance</div>
+            <div style={{ fontSize: '1.9rem', fontWeight: 900, color: '#b45309', lineHeight: 1.1 }}>
+              {ecoPoints.toLocaleString()} <span style={{ fontSize: '1rem' }}>PTS</span>
             </div>
           </div>
         </div>
       </div>
 
-      {/* Category Tabs */}
-      <div style={{
-        display: 'flex',
-        gap: '0.5rem',
-        marginBottom: '1.5rem',
-        overflowX: 'auto',
-        paddingBottom: '0.25rem'
-      }}>
-        {categories.map((cat) => (
+      {/* Category Pills */}
+      <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '2rem', flexWrap: 'wrap' }}>
+        {categories.map(cat => (
           <button
             key={cat}
             onClick={() => setSelectedCategory(cat)}
             style={{
               padding: '0.45rem 1rem',
-              fontSize: '0.85rem',
               borderRadius: '999px',
-              border: 'none',
-              cursor: 'pointer',
-              background: selectedCategory === cat ? 'rgba(245, 158, 11, 0.25)' : 'rgba(255, 255, 255, 0.05)',
-              color: selectedCategory === cat ? '#fef08a' : '#94a3b8',
-              borderBottom: selectedCategory === cat ? '2px solid #fbbf24' : '2px solid transparent',
+              border: selectedCategory === cat ? '2px solid #059669' : '1px solid #cbd5e1',
+              background: selectedCategory === cat ? '#dcfce7' : '#ffffff',
+              color: selectedCategory === cat ? '#047857' : '#475569',
+              fontSize: '0.82rem',
               fontWeight: selectedCategory === cat ? 700 : 500,
-              whiteSpace: 'nowrap',
-              transition: 'all 0.2s'
+              cursor: 'pointer'
             }}
           >
             {cat}
@@ -169,7 +113,7 @@ export const EcoRewards: React.FC<EcoRewardsProps> = ({
         ))}
       </div>
 
-      {/* Rewards Catalog Grid */}
+      {/* Rewards Grid */}
       <div className="grid-3">
         {filteredRewards.map((reward) => {
           const canAfford = ecoPoints >= reward.costPoints;
@@ -179,88 +123,87 @@ export const EcoRewards: React.FC<EcoRewardsProps> = ({
               key={reward.id}
               className="glass-card"
               style={{
-                padding: '1.5rem',
                 display: 'flex',
                 flexDirection: 'column',
-                justifyContent: 'space-between',
-                border: canAfford ? '1px solid rgba(245, 158, 11, 0.25)' : '1px solid rgba(255, 255, 255, 0.06)'
+                overflow: 'hidden',
+                justifyContent: 'space-between'
               }}
             >
               <div>
-                {/* Top Row: Brand & Category Badge */}
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                    <div style={{
-                      width: '38px',
-                      height: '38px',
-                      borderRadius: '10px',
-                      background: 'rgba(255, 255, 255, 0.06)',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center'
-                    }}>
-                      {getRewardIcon(reward.iconName)}
-                    </div>
-                    <div>
-                      <div style={{ fontSize: '0.75rem', color: '#94a3b8' }}>{reward.brand}</div>
-                      <div style={{ fontSize: '0.7rem', color: '#10b981', fontWeight: 600 }}>{reward.category}</div>
-                    </div>
-                  </div>
-
-                  <span className="badge badge-amber">{reward.tag}</span>
-                </div>
-
-                {/* Title & Description */}
-                <h3 style={{ fontSize: '1.1rem', fontWeight: 700, color: '#f8fafc', marginBottom: '0.5rem' }}>
-                  {reward.title}
-                </h3>
-                <p style={{ fontSize: '0.82rem', color: '#94a3b8', lineHeight: 1.5, marginBottom: '1.25rem' }}>
-                  {reward.description}
-                </p>
-              </div>
-
-              {/* Bottom: Cost & Redeem Button */}
-              <div>
+                {/* Reward Top Header Badge */}
                 <div style={{
+                  padding: '1.5rem 1.25rem 1rem 1.25rem',
+                  background: 'linear-gradient(135deg, #f8fafc 0%, #f0fdf4 100%)',
+                  borderBottom: '1px solid #e2e8f0',
                   display: 'flex',
                   justifyContent: 'space-between',
-                  alignItems: 'center',
-                  paddingTop: '0.75rem',
-                  borderTop: '1px solid rgba(255, 255, 255, 0.08)',
-                  marginBottom: '0.85rem'
+                  alignItems: 'flex-start'
                 }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
-                    <Coins size={16} color="#fbbf24" />
-                    <span style={{ fontSize: '1.2rem', fontWeight: 800, color: '#ffffff' }}>
-                      {reward.costPoints}
+                  <div>
+                    <span className="badge badge-emerald" style={{ marginBottom: '0.4rem' }}>
+                      {reward.category}
                     </span>
-                    <span style={{ fontSize: '0.75rem', color: '#fbbf24', fontWeight: 600 }}>PTS</span>
+                    <h3 style={{ fontSize: '1.15rem', fontWeight: 800, color: '#0f172a' }}>
+                      {reward.title}
+                    </h3>
                   </div>
-                  <span style={{ fontSize: '0.75rem', color: '#64748b' }}>
-                    {reward.stockAvailable} available
-                  </span>
+
+                  <div style={{
+                    background: '#ffffff',
+                    color: '#b45309',
+                    fontWeight: 800,
+                    fontSize: '0.85rem',
+                    padding: '0.3rem 0.75rem',
+                    borderRadius: '999px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '0.3rem',
+                    boxShadow: '0 2px 6px rgba(0,0,0,0.06)',
+                    border: '1px solid #fde68a'
+                  }}>
+                    <Coins size={14} color="#d97706" />
+                    <span>{reward.costPoints} PTS</span>
+                  </div>
                 </div>
 
+                {/* Content */}
+                <div style={{ padding: '1.25rem' }}>
+                  <p style={{ fontSize: '0.85rem', color: '#64748b', lineHeight: 1.5, marginBottom: '0.75rem' }}>
+                    {reward.description}
+                  </p>
+
+                  <div style={{ fontSize: '0.78rem', color: '#059669', fontWeight: 600 }}>
+                    Brand Partner: {reward.brand} • In Stock: {reward.stockAvailable}
+                  </div>
+                </div>
+              </div>
+
+              {/* Action Button */}
+              <div style={{ padding: '1.25rem', borderTop: '1px solid #f1f5f9' }}>
                 <button
                   onClick={() => handleRedeem(reward)}
                   disabled={!canAfford}
-                  className="btn-primary"
+                  className={canAfford ? "btn-eco" : "btn-secondary"}
                   style={{
                     width: '100%',
                     padding: '0.65rem',
-                    fontSize: '0.85rem',
                     borderRadius: '10px',
-                    background: canAfford 
-                      ? 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)'
-                      : 'rgba(255, 255, 255, 0.05)',
-                    color: canAfford ? '#ffffff' : '#64748b',
-                    border: canAfford ? 'none' : '1px solid rgba(255, 255, 255, 0.08)',
+                    fontSize: '0.85rem',
                     cursor: canAfford ? 'pointer' : 'not-allowed',
-                    boxShadow: canAfford ? '0 4px 15px rgba(245, 158, 11, 0.3)' : 'none'
+                    opacity: canAfford ? 1 : 0.65
                   }}
                 >
-                  <Gift size={16} />
-                  <span>{canAfford ? 'Redeem Voucher' : `Need ${reward.costPoints - ecoPoints} More PTS`}</span>
+                  {canAfford ? (
+                    <>
+                      <Sparkles size={16} />
+                      <span>Redeem for {reward.costPoints} PTS</span>
+                    </>
+                  ) : (
+                    <>
+                      <Lock size={16} />
+                      <span>Need {reward.costPoints - ecoPoints} More PTS</span>
+                    </>
+                  )}
                 </button>
               </div>
             </div>
@@ -268,14 +211,14 @@ export const EcoRewards: React.FC<EcoRewardsProps> = ({
         })}
       </div>
 
-      {/* Voucher Confirmation Modal */}
-      {activeVoucherModal && (
+      {/* Voucher Success Modal */}
+      {activeVoucher && (
         <div style={{
           position: 'fixed',
           inset: 0,
-          background: 'rgba(0, 0, 0, 0.85)',
+          background: 'rgba(15, 23, 42, 0.6)',
           backdropFilter: 'blur(8px)',
-          zIndex: 110,
+          zIndex: 100,
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
@@ -285,64 +228,61 @@ export const EcoRewards: React.FC<EcoRewardsProps> = ({
             maxWidth: '480px',
             width: '100%',
             padding: '2rem',
-            background: 'rgba(15, 23, 42, 0.95)',
-            border: '2px solid #fbbf24',
-            textAlign: 'center'
+            background: '#ffffff',
+            border: '1px solid #cbd5e1',
+            borderRadius: '20px',
+            textAlign: 'center',
+            boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)'
           }}>
             <div style={{
-              width: '60px',
-              height: '60px',
+              width: '64px',
+              height: '64px',
               borderRadius: '50%',
-              background: 'rgba(245, 158, 11, 0.2)',
-              color: '#fbbf24',
+              background: '#dcfce7',
+              color: '#059669',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              margin: '0 auto 1rem auto',
-              boxShadow: '0 0 20px rgba(245, 158, 11, 0.4)'
+              margin: '0 auto 1.25rem auto'
             }}>
-              <Sparkles size={32} />
+              <CheckCircle2 size={36} />
             </div>
 
-            <h3 style={{ fontSize: '1.5rem', fontWeight: 800, color: '#f8fafc', marginBottom: '0.25rem' }}>
-              Voucher Unlocked! 🎉
+            <h3 style={{ fontSize: '1.4rem', fontWeight: 800, color: '#0f172a', marginBottom: '0.3rem' }}>
+              Voucher Claimed Successfully!
             </h3>
-            <p style={{ fontSize: '0.85rem', color: '#94a3b8', marginBottom: '1.5rem' }}>
-              You redeemed <strong>{activeVoucherModal.title}</strong> from {activeVoucherModal.brand}.
+            <p style={{ fontSize: '0.85rem', color: '#64748b', marginBottom: '1.5rem' }}>
+              You redeemed <strong>{activeVoucher.reward.title}</strong> for {activeVoucher.reward.costPoints} Eco-Points.
             </p>
 
-            {/* Discount Code Box */}
+            {/* Code Box */}
             <div style={{
-              background: '#090d16',
-              border: '2px dashed #fbbf24',
+              background: '#f8fafc',
+              border: '2px dashed #cbd5e1',
               padding: '1rem',
               borderRadius: '12px',
-              marginBottom: '1.5rem',
               display: 'flex',
+              justifyContent: 'space-between',
               alignItems: 'center',
-              justifyContent: 'space-between'
+              marginBottom: '1.5rem'
             }}>
-              <div>
-                <div style={{ fontSize: '0.7rem', color: '#94a3b8', textTransform: 'uppercase' }}>Coupon Code</div>
-                <div style={{ fontSize: '1.25rem', fontWeight: 800, color: '#fbbf24', letterSpacing: '0.05em' }}>
-                  {activeVoucherModal.discountCode}
-                </div>
-              </div>
-
+              <span style={{ fontSize: '1.2rem', fontWeight: 800, letterSpacing: '0.1em', color: '#059669' }}>
+                {activeVoucher.code}
+              </span>
               <button
-                onClick={() => handleCopyCode(activeVoucherModal.discountCode)}
+                onClick={handleCopyCode}
                 className="btn-secondary"
-                style={{ padding: '0.5rem 0.85rem', fontSize: '0.8rem' }}
+                style={{ padding: '0.45rem 0.85rem', fontSize: '0.78rem', borderRadius: '8px' }}
               >
-                {copiedCode ? <Check size={16} color="#10b981" /> : <Copy size={16} />}
-                <span>{copiedCode ? 'Copied!' : 'Copy'}</span>
+                {copiedCode ? <Check size={14} color="#059669" /> : <Copy size={14} />}
+                <span>{copiedCode ? "Copied!" : "Copy"}</span>
               </button>
             </div>
 
             <button
-              onClick={() => setActiveVoucherModal(null)}
-              className="btn-primary"
-              style={{ width: '100%', padding: '0.75rem' }}
+              onClick={() => setActiveVoucher(null)}
+              className="btn-eco"
+              style={{ width: '100%', padding: '0.75rem', borderRadius: '12px' }}
             >
               Done & Return to Store
             </button>

@@ -1,10 +1,16 @@
-import { StrictMode } from 'react'
-import { createRoot } from 'react-dom/client'
+import React from "react";
+import ReactDOM from "react-dom/client";
+import App from "./App";
 import './index.css'
-import App from './App.tsx'
+import { BrowserRouter } from "react-router-dom";
+import { DashboardProvider } from "@/context/DashboardContext";
+import { MapContainer, TileLayer, Marker, Polyline } from "react-leaflet";
 
-createRoot(document.getElementById('root')!).render(
-  <StrictMode>
-    <App />
-  </StrictMode>,
-)
+
+ReactDOM.createRoot(document.getElementById("root")!).render(
+  <React.StrictMode>
+
+        <App />
+
+  </React.StrictMode>
+);
