@@ -197,6 +197,7 @@ const App: React.FC = () => {
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const lastAutoLogRef = useRef<number>(0);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
+  const smoothedDetectionsRef = useRef<Detection[]>([]);
 
   // Verify Auth Session on Mount
   useEffect(() => {
@@ -335,12 +336,37 @@ const App: React.FC = () => {
           }
         }));
 
-        setDetections(scaledDetections);
-        drawBoxes(scaledDetections);
+        // Temporal Box & Label Smoothing (Eliminates Jitter & False Flicker)
+        const prev = smoothedDetectionsRef.current;
+        const smoothedDetections: Detection[] = scaledDetections.map((curr: Detection) => {
+          const match = prev.find(
+            (p) =>
+              p.label === curr.label &&
+              Math.abs(p.box.x1 - curr.box.x1) < 90 &&
+              Math.abs(p.box.y1 - curr.box.y1) < 90
+          );
+          if (match) {
+            return {
+              ...curr,
+              confidence: Math.round(0.7 * curr.confidence + 0.3 * match.confidence),
+              box: {
+                x1: Math.round(0.65 * curr.box.x1 + 0.35 * match.box.x1),
+                y1: Math.round(0.65 * curr.box.y1 + 0.35 * match.box.y1),
+                x2: Math.round(0.65 * curr.box.x2 + 0.35 * match.box.x2),
+                y2: Math.round(0.65 * curr.box.y2 + 0.35 * match.box.y2),
+              },
+            };
+          }
+          return curr;
+        });
+
+        smoothedDetectionsRef.current = smoothedDetections;
+        setDetections(smoothedDetections);
+        drawBoxes(smoothedDetections);
 
         // Auto-Log feature with 4-second cooldown
-        if (autoLogEnabled && scaledDetections.length > 0) {
-          const top = scaledDetections[0];
+        if (autoLogEnabled && smoothedDetections.length > 0) {
+          const top = smoothedDetections[0];
           const now = Date.now();
           if (top.confidence >= 82 && now - lastAutoLogRef.current > 4000) {
             lastAutoLogRef.current = now;

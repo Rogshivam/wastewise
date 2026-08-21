@@ -56,6 +56,7 @@ const CommunityPage = () => {
     category: "Overflow", 
     image: null as string | null 
   });
+  const [imageFile, setImageFile] = useState<File | null>(null);
   
   const { user, isAuthenticated } = useAuth();
   const { toast } = useToast();
@@ -121,10 +122,8 @@ const CommunityPage = () => {
       formData.append('category', newReport.category);
       formData.append('location', newReport.location);
       
-      if (newReport.image) {
-        const response = await fetch(newReport.image);
-        const blob = await response.blob();
-        formData.append('image', blob, 'grievance.jpg');
+      if (imageFile) {
+        formData.append('image', imageFile, imageFile.name);
       }
 
       let coordinatesStr = JSON.stringify([77.2090, 28.6139]); // Default Delhi coordinates
@@ -153,6 +152,7 @@ const CommunityPage = () => {
       if (data.success) {
         setGrievances([data.data, ...(grievances || [])]);
         setNewReport({ title: "", description: "", location: "", category: "Overflow", image: null });
+        setImageFile(null);
         setShowSubmitForm(false);
         toast({ title: "Report Submitted", description: "Your grievance has been registered successfully." });
       } else {
@@ -249,8 +249,9 @@ const CommunityPage = () => {
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
+      setImageFile(file);
       const reader = new FileReader();
-      reader.onloadend = () => setNewReport({ ...newReport, image: reader.result as string });
+      reader.onloadend = () => setNewReport(prev => ({ ...prev, image: reader.result as string }));
       reader.readAsDataURL(file);
     }
   };
@@ -415,6 +416,13 @@ const CommunityPage = () => {
                     </div>
                     <input type="file" accept="image/*" onChange={handleImageUpload} className="hidden" />
                   </label>
+
+                  {/* Title */}
+                  <div className="mb-3">
+                    <label className="text-xs font-medium text-muted-foreground mb-1 block">Title *</label>
+                    <input value={newReport.title} onChange={e => setNewReport({ ...newReport, title: e.target.value })} placeholder="Brief title for the issue"
+                      className="w-full px-3 py-2 rounded-xl border border-border bg-background/50 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/30" />
+                  </div>
 
                   {/* Location */}
                   <div className="mb-3">

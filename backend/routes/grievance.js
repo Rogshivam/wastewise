@@ -138,13 +138,20 @@ router.post('/', auth, upload.single('image'), async (req, res) => {
       });
     }
 
-    // Parse coordinates if provided
-    let parsedCoordinates = null;
+    // Parse coordinates if provided - ensure valid GeoJSON format
+    let geoCoordinates = { type: 'Point', coordinates: [77.2090, 28.6139] }; // Default Delhi
     if (coordinates) {
       try {
-        parsedCoordinates = JSON.parse(coordinates);
+        const parsed = JSON.parse(coordinates);
+        if (Array.isArray(parsed) && parsed.length === 2) {
+          // Plain array [lng, lat] -> convert to GeoJSON
+          geoCoordinates = { type: 'Point', coordinates: [parseFloat(parsed[0]), parseFloat(parsed[1])] };
+        } else if (parsed && parsed.coordinates && Array.isArray(parsed.coordinates)) {
+          // Already GeoJSON format
+          geoCoordinates = { type: 'Point', coordinates: parsed.coordinates.map(Number) };
+        }
       } catch (e) {
-        parsedCoordinates = null;
+        // Keep default
       }
     }
 
@@ -155,10 +162,7 @@ router.post('/', auth, upload.single('image'), async (req, res) => {
       description,
       category,
       location,
-      coordinates: parsedCoordinates || {
-        type: 'Point',
-        coordinates: [77.2090, 28.6139] // Default Delhi coordinates
-      },
+      coordinates: geoCoordinates,
       image: req.file ? `/uploads/grievances/${req.file.filename}` : null,
       status: 'Pending',
       priority: 0,

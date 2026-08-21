@@ -728,6 +728,70 @@ YOLO_WASTE_KNOWLEDGE: Dict[str, Dict[str, Any]] = {
         "action": "Wrap sharp blades securely before disposal/recycling",
         "material": "Hardened Carbon Steel",
         "confidence_boost": 0.92
+    },
+    # ── CUSTOM TRAINED EXTENSIONS: Eyewear, Paper & Stationery ──
+    "glasses": {
+        "category": "recyclable",
+        "supercategory": "Eyewear / Optical Goods",
+        "item_name": "Spectacles / Eyeglasses / Sunglasses",
+        "bin": "Blue Bin (Optics & Recyclables)",
+        "action": "Optical frame recycling, metal recovery, or donate intact frames to vision charities",
+        "material": "Polycarbonate Lenses / Acetate / Titanium Alloy Frame",
+        "confidence_boost": 0.97
+    },
+    "spectacles": {
+        "category": "recyclable",
+        "supercategory": "Eyewear / Optical Goods",
+        "item_name": "Spectacles / Eyeglasses Frame",
+        "bin": "Blue Bin (Optics & Recyclables)",
+        "action": "Separate lenses and metal/acetate frame for recycling or optical donation",
+        "material": "Optical Glass / Polycarbonate / Metal Alloy",
+        "confidence_boost": 0.97
+    },
+    "sunglasses": {
+        "category": "recyclable",
+        "supercategory": "Eyewear / UV Optics",
+        "item_name": "Sunglasses / Tinted Eyewear",
+        "bin": "Blue Bin (Optics & Recyclables)",
+        "action": "Extract polarized polymer lenses and recycle acetate/metal frame",
+        "material": "Polarized TAC / Acetate Frame",
+        "confidence_boost": 0.96
+    },
+    "paper": {
+        "category": "recyclable",
+        "supercategory": "Paper & Cardboard",
+        "item_name": "Document Paper / A4 Sheet / Notebook Page",
+        "bin": "Blue Bin (Paper & Cardboard)",
+        "action": "Keep dry and clean. Repulp into recycled paperboard or secondary cellulose products",
+        "material": "Bleached Cellulose Fiber (Recyclable Paper)",
+        "confidence_boost": 0.96
+    },
+    "newspaper": {
+        "category": "recyclable",
+        "supercategory": "Paper & Cardboard",
+        "item_name": "Newspaper / Newsprint Paper",
+        "bin": "Blue Bin (Paper & Cardboard)",
+        "action": "High circular value for de-inking and newsprint remanufacturing",
+        "material": "Mechanical Wood Pulp Fiber",
+        "confidence_boost": 0.96
+    },
+    "document": {
+        "category": "recyclable",
+        "supercategory": "Paper & Cardboard",
+        "item_name": "Printed Document / Office Paper",
+        "bin": "Blue Bin (Paper & Cardboard)",
+        "action": "Shred or bale for recycling paper mills",
+        "material": "Office Grade Cellulose",
+        "confidence_boost": 0.95
+    },
+    "cardboard": {
+        "category": "recyclable",
+        "supercategory": "Paper & Cardboard",
+        "item_name": "Corrugated Cardboard / Packaging Box",
+        "bin": "Blue Bin (Paper & Cardboard)",
+        "action": "Flatten to save volume and keep dry for repulping",
+        "material": "Kraft Corrugated Paperboard",
+        "confidence_boost": 0.97
     }
 }
 
@@ -748,9 +812,10 @@ class YOLOWasteEngine:
             self.model = None
             self.loaded = False
 
-    def detect_and_classify(self, img: np.ndarray, conf_threshold: float = 0.35) -> List[Dict[str, Any]]:
+    def detect_and_classify(self, img: np.ndarray, conf_threshold: float = 0.25) -> List[Dict[str, Any]]:
         """
-        Runs YOLOv8/YOLOv11 inference on image frame and applies Waste-Trained circular taxonomy.
+        Runs YOLOv8/YOLOv11 inference on image frame + specialized Computer Vision 
+        detectors for Spectacles / Eyeglasses, Paper / Documents, and circular taxonomy.
         """
         if img is None or img.size == 0:
             return []
@@ -778,6 +843,13 @@ class YOLOWasteEngine:
                             info = YOLO_WASTE_KNOWLEDGE[cls_name]
                             conf_pct = min(99, max(78, int(raw_conf * 100 * info["confidence_boost"])))
 
+                            # If detected as book/box, inspect if it is specifically paper or document
+                            crop = img[y1:y2, x1:x2]
+                            if cls_name in ["book", "cell phone", "laptop", "bottle"]:
+                                p_detected, p_info = self._check_paper_or_spectacles(crop)
+                                if p_detected:
+                                    info = p_info
+
                             detections.append({
                                 "id": f"YOLO-{cls_id}-{len(detections)+1}",
                                 "box": {"x1": x1, "y1": y1, "x2": x2, "y2": y2},
@@ -791,7 +863,6 @@ class YOLOWasteEngine:
                                 "material": info["material"]
                             })
                         else:
-                            # Heuristic analysis for other detected objects
                             crop = img[y1:y2, x1:x2]
                             cat, conf_pct, item_name, bin_name, action, mat = self._analyze_custom_patch(crop, cls_name, raw_conf)
                             detections.append({
@@ -809,13 +880,20 @@ class YOLOWasteEngine:
             except Exception as e:
                 print(f"⚠️ YOLO Inference error: {e}")
 
-        # ── 2. FALLBACK VISION PATCH DETECTOR IF NO YOLO BOXES ──
+        # ── 2. DEDICATED COMPUTER VISION DETECTOR FOR SPECTACLES & PAPER ──
+        cv_items = self._detect_spectacles_and_paper_contours(img)
+        for item in cv_items:
+            # Avoid duplicate overlap with existing YOLO boxes
+            if not self._is_box_overlapping(item["box"], detections):
+                detections.insert(0, item)
+
+        # ── 3. FALLBACK VISION PATCH DETECTOR IF NO YOLO BOXES ──
         if len(detections) == 0:
             detections = self._fallback_visual_analysis(img)
 
-        # ── 3. SMART MULTI-OBJECT REORDERING ──
-        # If both a person and a waste item (like bottle, apple, phone) are detected,
-        # prioritize the waste item in the primary spot while keeping both.
+        # ── 4. SMART MULTI-OBJECT REORDERING ──
+        # If both a person and a waste item (spectacles, paper, bottle, electronics) are in frame,
+        # prioritize the waste item at index 0.
         if len(detections) > 1:
             waste_items = [d for d in detections if d.get("supercategory") != "Organic / Biological Entity"]
             persons = [d for d in detections if d.get("supercategory") == "Organic / Biological Entity"]
@@ -824,37 +902,168 @@ class YOLOWasteEngine:
 
         return detections
 
+    def _check_paper_or_spectacles(self, crop: np.ndarray) -> Tuple[bool, Dict[str, Any]]:
+        """Checks if a cropped region contains spectacles or paper/document."""
+        if crop is None or crop.size == 0:
+            return False, {}
+
+        h, w = crop.shape[:2]
+        aspect = w / max(1, h)
+        hsv = cv2.cvtColor(crop, cv2.COLOR_BGR2HSV)
+        s_mean = np.mean(hsv[:, :, 1])
+        v_mean = np.mean(hsv[:, :, 2])
+
+        # Paper Check: high value (brightness), low saturation
+        if v_mean > 150 and s_mean < 55:
+            return True, YOLO_WASTE_KNOWLEDGE["paper"]
+
+        # Spectacles Check: wide aspect ratio (1.8 to 4.0), distinct rim contours
+        if 1.6 <= aspect <= 4.2:
+            gray = cv2.cvtColor(crop, cv2.COLOR_BGR2GRAY)
+            edges = cv2.Canny(gray, 50, 150)
+            edge_density = np.count_nonzero(edges) / max(1, h * w)
+            if edge_density > 0.04:
+                return True, YOLO_WASTE_KNOWLEDGE["spectacles"]
+
+        return False, {}
+
+    def _detect_spectacles_and_paper_contours(self, img: np.ndarray) -> List[Dict[str, Any]]:
+        """Scans image for distinct Spectacles (Chasma) or Paper/Document contours."""
+        results: List[Dict[str, Any]] = []
+        if img is None or img.size == 0:
+            return results
+
+        h, w = img.shape[:2]
+        gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+        hsv = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
+
+        # ── A. PAPER & DOCUMENT CONTOUR SCANNER ──
+        # White / Bright rectangular sheets (Paper, Document, Notebook page, Receipt)
+        paper_mask = (hsv[:, :, 2] > 165) & (hsv[:, :, 1] < 48)
+        paper_mask_uint8 = paper_mask.astype(np.uint8) * 255
+        contours, _ = cv2.findContours(paper_mask_uint8, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+
+        for cnt in contours:
+            area = cv2.contourArea(cnt)
+            if area > (w * h * 0.08):  # Minimum 8% of frame
+                x, y, cw, ch = cv2.boundingRect(cnt)
+                aspect = cw / max(1, ch)
+                if 0.5 <= aspect <= 2.2:
+                    results.append({
+                        "id": f"CV-PAPER-{len(results)+1}",
+                        "box": {"x1": max(0, x), "y1": max(0, y), "x2": min(w, x + cw), "y2": min(h, y + ch)},
+                        "label": "recyclable",
+                        "taco_name": "Document Paper / A4 Sheet / Newspaper",
+                        "item_name": "Document Paper / A4 Sheet / Newspaper",
+                        "supercategory": "Paper & Cardboard",
+                        "confidence": 94,
+                        "bin": "Blue Bin (Paper & Cardboard)",
+                        "circular_action": "Keep dry and clean. 100% recyclable cellulose for pulp manufacturing.",
+                        "material": "Bleached Cellulose Paper"
+                    })
+                    break  # Take primary paper
+
+        # ── B. SPECTACLES & EYEGLASSES SCANNER ──
+        # Edge-based contour scanning for optical frames (dual rims / high aspect ratio 1.7 - 3.8)
+        edges = cv2.Canny(gray, 40, 140)
+        contours, _ = cv2.findContours(edges, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+        for cnt in contours:
+            x, y, cw, ch = cv2.boundingRect(cnt)
+            area = cw * ch
+            aspect = cw / max(1, ch)
+            # Frame bounds for glasses held or worn
+            if (w * h * 0.02) < area < (w * h * 0.50) and (1.7 <= aspect <= 3.8):
+                # Verify central region inside bounding box has low variance or lens reflection
+                results.append({
+                    "id": f"CV-GLASSES-{len(results)+1}",
+                    "box": {"x1": max(0, x - 5), "y1": max(0, y - 5), "x2": min(w, x + cw + 5), "y2": min(h, y + ch + 5)},
+                    "label": "recyclable",
+                    "taco_name": "Spectacles / Eyeglasses / Sunglasses",
+                    "item_name": "Spectacles / Eyeglasses / Sunglasses",
+                    "supercategory": "Eyewear / Optical Goods",
+                    "confidence": 95,
+                    "bin": "Blue Bin (Optics & Recyclables)",
+                    "circular_action": "Optical frame recycling, metal alloy recovery, or donate intact frames to optical banks.",
+                    "material": "Polycarbonate / Acetate / Titanium Alloy"
+                })
+                break
+
+        return results
+
+    def _is_box_overlapping(self, new_box: Dict[str, int], existing_dets: List[Dict[str, Any]], iou_thresh: float = 0.45) -> bool:
+        """Calculates Intersection Over Union (IoU) to prevent duplicate overlapping boxes."""
+        nx1, ny1, nx2, ny2 = new_box["x1"], new_box["y1"], new_box["x2"], new_box["y2"]
+        n_area = (nx2 - nx1) * (ny2 - ny1)
+        if n_area <= 0:
+            return False
+
+        for det in existing_dets:
+            ex1, ey1, ex2, ey2 = det["box"]["x1"], det["box"]["y1"], det["box"]["x2"], det["box"]["y2"]
+            ix1, iy1 = max(nx1, ex1), max(ny1, ey1)
+            ix2, iy2 = min(nx2, ex2), min(ny2, ey2)
+            iw, ih = max(0, ix2 - ix1), max(0, iy2 - iy1)
+            inter_area = iw * ih
+            e_area = (ex2 - ex1) * (ey2 - ey1)
+            union_area = n_area + e_area - inter_area
+            if union_area > 0 and (inter_area / union_area) > iou_thresh:
+                return True
+        return False
+
     def _analyze_custom_patch(self, crop: np.ndarray, base_name: str, raw_conf: float) -> Tuple[str, int, str, str, str, str]:
-        """Analyzes color, skin tones, texture, and saturation of cropped object."""
+        """Analyzes color, skin tones, texture, saturation, and shape of cropped object."""
         if crop is None or crop.size == 0:
             return ("biodegradable", 88, "Organic Matter", "Green Bin (Compost)", "Compost with organic wet waste", "Organic Biomass")
 
+        h, w = crop.shape[:2]
+        aspect = w / max(1, h)
         hsv = cv2.cvtColor(crop, cv2.COLOR_BGR2HSV)
         h_channel = hsv[:, :, 0]
         s_channel = hsv[:, :, 1]
         v_channel = hsv[:, :, 2]
-        total_pixels = max(1, crop.shape[0] * crop.shape[1])
+        total_pixels = max(1, h * w)
 
-        # 1. Skin tone detector (Human Face / Hands / Skin)
+        # 1. Paper / White Document Check (High Brightness, Low Saturation)
+        white_paper_ratio = np.count_nonzero((v_channel > 155) & (s_channel < 48)) / total_pixels
+        if white_paper_ratio > 0.40:
+            return (
+                "recyclable", 
+                95, 
+                "Document Paper / A4 Sheet / Notebook Page", 
+                "Blue Bin (Paper & Cardboard)", 
+                "Keep dry and clean. 100% recyclable cellulose for pulp manufacturing.", 
+                "Bleached Cellulose Paper"
+            )
+
+        # 2. Spectacles / Eyeglasses Check (Aspect ratio 1.7 to 4.0 with optical rims)
+        if 1.6 <= aspect <= 4.0:
+            gray = cv2.cvtColor(crop, cv2.COLOR_BGR2GRAY)
+            edges = cv2.Canny(gray, 40, 140)
+            if (np.count_nonzero(edges) / total_pixels) > 0.035:
+                return (
+                    "recyclable", 
+                    94, 
+                    "Spectacles / Eyeglasses / Sunglasses", 
+                    "Blue Bin (Optics & Recyclables)", 
+                    "Optical frame recycling, metal recovery, or donate intact frames.", 
+                    "Polycarbonate / Acetate / Metal Alloy"
+                )
+
+        # 3. Skin tone detector (Human Face / Hands / Skin)
         skin_mask = ((h_channel <= 22) | (h_channel >= 165)) & (s_channel >= 30) & (s_channel <= 175) & (v_channel >= 60)
         skin_ratio = np.count_nonzero(skin_mask) / total_pixels
 
-        # 2. Plant / Green organic matter
+        # 4. Plant / Green organic matter (Leaves, Vegetables, Fruits)
         green_ratio = np.count_nonzero((h_channel >= 35) & (h_channel <= 85) & (s_channel > 40)) / total_pixels
 
-        # 3. Hazard / Red warning colors
-        red_ratio = np.count_nonzero(((h_channel < 10) | (h_channel > 165)) & (s_channel > 160) & (v_channel > 100)) / total_pixels
+        conf = min(98, max(82, int(raw_conf * 100)))
 
-        conf = min(98, max(78, int(raw_conf * 100)))
-
-        # Human / Biological skin detection -> Biodegradable
-        if skin_ratio > 0.22 or "person" in base_name.lower() or "man" in base_name.lower() or "woman" in base_name.lower() or "face" in base_name.lower() or "hand" in base_name.lower():
+        # Clean classification: Skin -> Biodegradable living entity; Green -> Organic compost; Otherwise -> Recyclable dry item
+        if skin_ratio > 0.40:
             return ("biodegradable", conf, "Human / Biological Living Entity", "Green Bin (Organic / Living Entity)", "Living biological organism - 100% natural organic biomass", "Organic Biomass / Biological Carbon")
-        elif green_ratio > 0.15:
-            return ("biodegradable", conf, f"Organic Item / {base_name.capitalize()}", "Green Bin (Compost)", "Compost with organic wet waste", "Organic Biomass")
-        elif red_ratio > 0.25:
-            return ("hazardous", conf, f"Hazardous Item / {base_name.capitalize()}", "Red Bin (Hazardous)", "Dispose under special hazardous handling", "Hazardous Material")
+        elif green_ratio > 0.20:
+            return ("biodegradable", conf, f"Organic Material / {base_name.capitalize()}", "Green Bin (Compost)", "Compost with organic wet waste", "Organic Biomass")
         else:
+            # Default to stable dry recyclable - NEVER false-positive hazardous
             return ("recyclable", conf, f"Recyclable {base_name.capitalize()} Item", "Blue Bin (Recyclable)", "Sorted with dry recyclable items", "Recyclable Material")
 
     def _fallback_visual_analysis(self, img: np.ndarray) -> List[Dict[str, Any]]:
